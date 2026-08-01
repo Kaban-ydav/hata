@@ -543,8 +543,7 @@ import requests
 import asyncio
 from curl_cffi import requests
 
-async def parse_daft(seen_urls):
-    # Прямой API-эндпоинт Daft.ie
+async def parse_daft(page, seen_urls):
     api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
     
     headers = {
@@ -554,7 +553,6 @@ async def parse_daft(seen_urls):
         "Platform": "web"
     }
 
-    # Настройки поиска по графствам
     search_configs = [
         {"name": "Wexford (Комнаты)", "section": "sharing", "county": "wexford"},
         {"name": "Wexford (Целиком)", "section": "residential-to-let", "county": "wexford"},
@@ -577,11 +575,15 @@ async def parse_daft(seen_urls):
         }
 
         try:
-            def make_post_request():
-                with requests.Session(impersonate="chrome110") as s:
-                    return s.post(api_url, json=payload, headers=headers, timeout=15)
-
-            response = await asyncio.to_thread(make_post_request)
+            # Делаем запрос с эмуляцией Chrome напрямую через curl_cffi
+            response = await asyncio.to_thread(
+                requests.post,
+                api_url,
+                json=payload,
+                headers=headers,
+                impersonate="chrome110",
+                timeout=15
+            )
             
             if response.status_code != 200:
                 print(f"[!] API ответил кодом {response.status_code} на {config['name']}")
@@ -630,7 +632,7 @@ async def parse_daft(seen_urls):
                         f"🚨 *Найдено на Daft.ie!*\n\n"
                         f"📌 *Тип:* {prop_badge}\n"
                         f"🏠 *Адрес:* {address}\n"
-                        f"🛏️ *Спальни:* {room_type}\n"
+                        f"| Спальни:* {room_type}\n"
                         f"💰 *Цена:* {display_price}\n\n"
                         f"🔗 [ОТКРЫТЬ ОБЪЯВЛЕНИЕ]({full_url})"
                     )
@@ -642,7 +644,7 @@ async def parse_daft(seen_urls):
 
         except Exception as e:
             print(f"[!] Ошибка API Daft: {e}")
-            
+
 async def sites_parser_loop():
     print("🚀 Фоновый парсер сайтов (Daft + Rent) запущен!")
     seen_urls = load_seen_urls()
