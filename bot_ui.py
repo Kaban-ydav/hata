@@ -537,6 +537,8 @@ async def unknown(message: types.Message):
 # ==========================================
 # 🕵️‍♂️ ПАРСЕРЫ САЙТОВ (Daft.ie + Rent.ie)
 # ==========================================
+import requests
+
 async def parse_daft(page, seen_urls):
     urls_daft = {
         "Wexford (Комнаты)": "https://www.daft.ie/sharing/wexford-county?sort=publishDateDesc",
@@ -548,27 +550,42 @@ async def parse_daft(page, seen_urls):
         "Ireland (Все свежие)": "https://www.daft.ie/sharing/ireland?sort=publishDateDesc"
     }
 
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+    }
+
     try:
         for location, url in urls_daft.items():
-            print(f"[*] Сканируем Daft.ie -> {location}...")
-            await page.goto(url, wait_until="domcontentloaded", timeout=60000)
-            await page.wait_for_timeout(random.randint(2000, 3500))
+            print(f"[*] Сканируем Daft.ie (requests) -> {location}...")
             
-            html = await page.content()
-            soup = BeautifulSoup(html, "html.parser")
+            # Делаем обычный HTTP запрос вместо тяжелого Chromium
+            response = await asyncio.to_thread(requests.get, url, headers=headers, timeout=15)
             
+            if response.status_code != 200:
+                print(f"[!] Daft ответил кодом {response.status_code} для {location}")
+                continue
+
+            soup = BeautifulSoup(response.text, "html.parser")
             next_data_script = soup.find("script", id="__NEXT_DATA__")
-            if not next_data_script:
+            
+            if not next_data_script or not next_data_script.string:
+                print(f"[-] Не найден __NEXT_DATA__ для {location}")
                 continue
             
             try:
                 data = json.loads(next_data_script.string)
                 listings = data["props"]["pageProps"]["listings"]
-            except Exception:
+            except Exception as e:
+                print(f"[!] Ошибка парсинга JSON для {location}: {e}")
                 continue
 
             if not listings:
+                print(f"[-] Объявлений не найдено в JSON для {location}")
                 continue
+
+            print(f"[+] Найдено {len(listings)} объявлений в {location}!")
 
             for item in listings:
                 listing_data = item.get("listing")
@@ -578,7 +595,7 @@ async def parse_daft(page, seen_urls):
                 price_text = listing_data.get("price", "").lower()
                 address = listing_data.get("title", "Адрес не указан")
                 seo_path = listing_data.get("seoFriendlyPath", "")
-                room_type = listing_data.get("numBedrooms", "Не указано")
+                room_type = str(listing_data.get("numBedrooms", "Не указано"))
                 
                 if not seo_path or not price_text:
                     continue
@@ -619,6 +636,9 @@ async def parse_daft(page, seen_urls):
                     save_new_url(full_url)
                     seen_urls.add(full_url)
             
+            # Небольшая пауза между запросами
+            await asyncio.sleep(2)
+
     except Exception as e:
         print(f"[!] Ошибка Daft: {e}")
 
