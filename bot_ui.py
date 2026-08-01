@@ -537,8 +537,6 @@ async def unknown(message: types.Message):
 # ==========================================
 # 🕵️‍♂️ ПАРСЕРЫ САЙТОВ (Daft.ie + Rent.ie)
 # ==========================================
-import requests
-
 async def parse_daft(page, seen_urls):
     urls_daft = {
         "Wexford (Комнаты)": "https://www.daft.ie/sharing/wexford-county?sort=publishDateDesc",
@@ -550,63 +548,54 @@ async def parse_daft(page, seen_urls):
         "Ireland (Все свежие)": "https://www.daft.ie/sharing/ireland?sort=publishDateDesc"
     }
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-    }
-
     try:
         for location, url in urls_daft.items():
-            print(f"[*] Сканируем Daft.ie (requests) -> {location}...")
+            print(f"[*] Сканируем Daft.ie -> {location}...")
+            await page.goto(url, wait_until="domcontentloaded", timeout=60000)
             
-            # Делаем обычный HTTP запрос вместо тяжелого Chromium
-            response = await asyncio.to_thread(requests.get, url, headers=headers, timeout=15)
-            
-            if response.status_code != 200:
-                print(f"[!] Daft ответил кодом {response.status_code} для {location}")
+            # Эмуляция человеческого поведения (скролл и случайная пауза)
+            await page.evaluate("window.scrollBy(0, 300)")
+            await page.wait_for_timeout(random.randint(3000, 5000))
+
+            html = await page.content()
+            soup = BeautifulSoup(html, "html.parser")
+
+            next_data_script = soup.find("script", id="__NEXT_DATA__")
+            if not next_data_script or not next_data_script.string:
+                print(f"[-] Cloudflare или нет данных на {location}")
                 continue
 
-            soup = BeautifulSoup(response.text, "html.parser")
-            next_data_script = soup.find("script", id="__NEXT_DATA__")
-            
-            if not next_data_script or not next_data_script.string:
-                print(f"[-] Не найден __NEXT_DATA__ для {location}")
-                continue
-            
             try:
                 data = json.loads(next_data_script.string)
                 listings = data["props"]["pageProps"]["listings"]
-            except Exception as e:
-                print(f"[!] Ошибка парсинга JSON для {location}: {e}")
+            except Exception:
                 continue
 
             if not listings:
-                print(f"[-] Объявлений не найдено в JSON для {location}")
                 continue
 
-            print(f"[+] Найдено {len(listings)} объявлений в {location}!")
+            print(f"[+] Найдено {len(listings)} вариантов на {location}")
 
             for item in listings:
                 listing_data = item.get("listing")
                 if not listing_data:
                     continue
-                
+
                 price_text = listing_data.get("price", "").lower()
                 address = listing_data.get("title", "Адрес не указан")
                 seo_path = listing_data.get("seoFriendlyPath", "")
                 room_type = str(listing_data.get("numBedrooms", "Не указано"))
-                
+
                 if not seo_path or not price_text:
                     continue
-                    
+
                 full_url = "https://www.daft.ie" + seo_path
-                
+
                 try:
                     price_digits = int(''.join(filter(str.isdigit, price_text)))
                 except ValueError:
                     continue
-                
+
                 if "week" in price_text:
                     monthly_price = int(price_digits * 4.33)
                     display_price = f"{price_text} (~€{monthly_price}/мес)"
@@ -635,12 +624,58 @@ async def parse_daft(page, seen_urls):
                     await broadcast_message(message, price=monthly_price, address_text=address, is_whole_property=is_whole_property_flag)
                     save_new_url(full_url)
                     seen_urls.add(full_url)
-            
-            # Небольшая пауза между запросами
-            await asyncio.sleep(2)
 
     except Exception as e:
         print(f"[!] Ошибка Daft: {e}")
+
+
+async def sites_parser_loop():
+    print("🚀 Фоновый парсер сайтов (Daft + Rent) запущен!")
+    seen_urls = load_seen_urls()
+
+    while True:
+        try:
+            async with async_playwright() as p:
+                is_linux = sys.platform.startswith("linux")
+
+                # Маскируем под реальный Chrome
+                launch_options = {
+                    "user_data_dir": PROFILE_DIR,
+                    "headless": True if is_linux else False,
+                    "args": [
+                        "--disable-blink-features=AutomationControlled",
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--disable-infobars",
+                        "--start-maximized",
+                    ],
+                    "viewport": {"width": 1920, "height": 1080},
+                    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                    "locale": "en-IE",
+                    "timezone_id": "Europe/Dublin"
+                }
+
+                if not is_linux and os.path.exists(CHROME_PATH):
+                    launch_options["executable_path"] = CHROME_PATH
+
+                context = await p.chromium.launch_persistent_context(**launch_options)
+                
+                # Маскируем webdriver
+                page = context.pages[0] if context.pages else await context.new_page()
+                await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+                while True:
+                    await parse_daft(page, seen_urls)
+                    await parse_rent(page, seen_urls)
+
+                    sleep_time = random.randint(240, 360)
+                    print(f"\n[*] Все сайты проверены. Спим {sleep_time // 60} минут...")
+                    print("="*60)
+                    await asyncio.sleep(sleep_time)
+
+        except Exception as e:
+            print(f"[⚠️] Ошибка парсера сайтов ({e}). Перезапуск через 10 секунд...")
+            await asyncio.sleep(10)
 
 async def parse_rent(page, seen_urls):
     url_rent = "https://www.rent.ie/rooms-to-rent/ireland/"
