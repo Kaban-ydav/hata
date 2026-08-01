@@ -15,6 +15,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from curl_cffi import requests
+
 # === НАСТРОЙКИ ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 
@@ -531,14 +532,12 @@ async def unknown(message: types.Message):
     await message.answer("Используй кнопки меню.", reply_markup=main_menu)
 
 # ==========================================
-# 🕵️‍♂️ ПАРСЕРЫ САЙТОВ (Daft.ie API + Rent.ie Playwright)
+# 🕵️‍♂️ ПАРСЕРЫ САЙТОВ (Daft.ie API via Playwright + Rent.ie)
 # ==========================================
-PROXY_URL = "http://qdonobox:9i6c55q41dzm@31.59.20.176:6754"
 
-async def parse_daft(seen_urls):
+async def parse_daft(page, seen_urls):
     api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Brand": "daft",
         "Platform": "web"
@@ -566,26 +565,14 @@ async def parse_daft(seen_urls):
         }
 
         try:
-            # fetch_api объявляем СТРОГО ПОСЛЕ создания payload для конкретного config!
-            def fetch_api():
-                s = requests.Session()
-                proxies = {"http": PROXY_URL, "https": PROXY_URL}
-                return s.post(
-                    api_url,
-                    json=payload,
-                    headers=headers,
-                    proxies=proxies,
-                    impersonate="chrome124",
-                    timeout=15
-                )
-
-            response = await asyncio.to_thread(fetch_api)
+            # Запрос выполняется через браузерный контекст Playwright!
+            response = await page.request.post(api_url, data=payload, headers=headers, timeout=15000)
             
-            if response.status_code != 200:
-                print(f"[!] API ответил кодом {response.status_code} на {config['name']}")
+            if response.status != 200:
+                print(f"[!] API ответил кодом {response.status} на {config['name']}")
                 continue
 
-            data = response.json()
+            data = await response.json()
             listings = data.get("listings", [])
 
             if not listings:
@@ -640,6 +627,7 @@ async def parse_daft(seen_urls):
 
         except Exception as e:
             print(f"[!] Ошибка API Daft: {e}")
+
 async def parse_rent(page, seen_urls):
     url_rent = "https://www.rent.ie/rooms-to-rent/ireland/"
     print("[*] Проверяем Rent.ie...")
@@ -700,16 +688,11 @@ async def sites_parser_loop():
 
     while True:
         try:
-            # 1. Сначала дергаем Daft напрямую через API
-            await parse_daft(seen_urls)
-
-            # 2. Затем через Playwright открываем Rent.ie
             async with async_playwright() as p:
                 is_linux = sys.platform.startswith("linux")
                 launch_options = {
                     "user_data_dir": PROFILE_DIR,
                     "headless": True if is_linux else False,
-                    "proxy": {"server": PROXY_URL},
                     "args": [
                         "--disable-blink-features=AutomationControlled",
                         "--no-sandbox",
@@ -728,7 +711,17 @@ async def sites_parser_loop():
                 context = await p.chromium.launch_persistent_context(**launch_options)
                 page = context.pages[0] if context.pages else await context.new_page()
 
+                # Сначала наносим визит на Daft.ie, чтобы сформировать нормальный сессионный контекст
+                try:
+                    await page.goto("https://www.daft.ie/", wait_until="domcontentloaded", timeout=30000)
+                    await page.wait_for_timeout(2000)
+                except Exception:
+                    pass
+
+                # Теперь шлем API-запросы через наш замаскированный Chromium
+                await parse_daft(page, seen_urls)
                 await parse_rent(page, seen_urls)
+                
                 await context.close()
 
             sleep_time = random.randint(240, 360) 
