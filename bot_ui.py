@@ -15,6 +15,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 import sys
 from playwright_stealth import stealth
+from curl_cffi import requests
 # === НАСТРОЙКИ ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 
@@ -47,7 +48,6 @@ dp = Dispatcher(storage=storage)
 # ==========================================
 # 🗄️ БАЗА ДАННЫХ И ХРАНЕНИЕ ОБЪЯВЛЕНИЙ
 # ==========================================
-import requests # Убедись, что requests импортирован вверху файла
 
 async def auto_clean_old_listings():
     """Раз в сутки проверяет сохраненные ссылки и удаляет сданные/удаленные варианты"""
