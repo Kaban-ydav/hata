@@ -5,6 +5,7 @@ import random
 import sqlite3
 import logging
 import json
+import sys
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
 from aiogram import Bot, Dispatcher, F, types
@@ -13,9 +14,8 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemo
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-import sys
-from playwright_stealth import stealth
 from curl_cffi import requests
+
 # === НАСТРОЙКИ ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 
@@ -65,10 +65,8 @@ async def auto_clean_old_listings():
 
             for listing_id, url in rows:
                 try:
-                    # Быстрый легкий запрос к странице
                     response = requests.get(url, headers=headers, timeout=10)
                     
-                    # Если страница выдает 404 или содержит текст об удалении/сдаче
                     is_deleted = False
                     if response.status_code == 404:
                         is_deleted = True
@@ -84,11 +82,9 @@ async def auto_clean_old_listings():
                         deleted_count += 1
                         print(f"🗑️ Удалено неактуальное объявление ID {listing_id}: {url}")
 
-                except Exception as e:
-                    # Если сайт не ответил, просто пропускаем
+                except Exception:
                     pass
                 
-                # Небольшая пауза между запросами, чтобы сайт не ругался
                 await asyncio.sleep(1)
 
             print(f"✅ [Чистка БД] Готово! Удалено неактуальных вариантов: {deleted_count}")
@@ -96,8 +92,8 @@ async def auto_clean_old_listings():
         except Exception as e:
             print(f"[!] Ошибка при очистке базы: {e}")
 
-        # Спим 24 часа (86400 секунд) до следующей чистки
         await asyncio.sleep(86400)
+
 def init_db():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -536,16 +532,11 @@ async def unknown(message: types.Message):
     await message.answer("Используй кнопки меню.", reply_markup=main_menu)
 
 # ==========================================
-# 🕵️‍♂️ ПАРСЕРЫ САЙТОВ (Daft.ie + Rent.ie)
+# 🕵️‍♂️ ПАРСЕРЫ САЙТОВ (Daft.ie API + Rent.ie Playwright)
 # ==========================================
-import requests
 
-import asyncio
-from curl_cffi import requests
-
-async def parse_daft(page, seen_urls):
+async def parse_daft(seen_urls):
     api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
-    
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
@@ -575,11 +566,10 @@ async def parse_daft(page, seen_urls):
         }
 
         try:
-            # Создаем сессию с маскировкой под Chrome 124
             def fetch_api():
                 s = requests.Session()
                 return s.post(api_url, json=payload, headers=headers, impersonate="chrome124", timeout=15)
-
+            
             response = await asyncio.to_thread(fetch_api)
             
             if response.status_code != 200:
@@ -642,58 +632,6 @@ async def parse_daft(page, seen_urls):
         except Exception as e:
             print(f"[!] Ошибка API Daft: {e}")
 
-async def sites_parser_loop():
-    print("🚀 Фоновый парсер сайтов (Daft + Rent) запущен!")
-    seen_urls = load_seen_urls()
-
-    while True:
-        try:
-            async with async_playwright() as p:
-                is_linux = sys.platform.startswith("linux")
-
-                # Маскируем под реальный Chrome
-                launch_options = {
-                    "user_data_dir": PROFILE_DIR,
-                    "headless": True if is_linux else False,
-                    "args": [
-                        "--disable-blink-features=AutomationControlled",
-                        "--no-sandbox",
-                        "--disable-dev-shm-usage",
-                        "--disable-infobars",
-                        "--start-maximized",
-                    ],
-                    "viewport": {"width": 1920, "height": 1080},
-                    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-                    "locale": "en-IE",
-                    "timezone_id": "Europe/Dublin"
-                }
-
-                if not is_linux and os.path.exists(CHROME_PATH):
-                    launch_options["executable_path"] = CHROME_PATH
-
-                context = await p.chromium.launch_persistent_context(**launch_options)
-                
-                # Маскируем webdriver
-                page = context.pages[0] if context.pages else await context.new_page()
-                context = await p.chromium.launch_persistent_context(**launch_options)
-
-                page = context.pages[0] if context.pages else await context.new_page()
-                await stealth(page)  # 👈 Замени stealth_async на stealth (или просто stealth(page))
-                await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-
-                while True:
-                    await parse_daft(page, seen_urls)
-                    await parse_rent(page, seen_urls)
-
-                    sleep_time = random.randint(240, 360)
-                    print(f"\n[*] Все сайты проверены. Спим {sleep_time // 60} минут...")
-                    print("="*60)
-                    await asyncio.sleep(sleep_time)
-
-        except Exception as e:
-            print(f"[⚠️] Ошибка парсера сайтов ({e}). Перезапуск через 10 секунд...")
-            await asyncio.sleep(10)
-
 async def parse_rent(page, seen_urls):
     url_rent = "https://www.rent.ie/rooms-to-rent/ireland/"
     print("[*] Проверяем Rent.ie...")
@@ -754,22 +692,26 @@ async def sites_parser_loop():
 
     while True:
         try:
+            # 1. Сначала дергаем Daft напрямую через API
+            await parse_daft(seen_urls)
+
+            # 2. Затем через Playwright открываем Rent.ie
             async with async_playwright() as p:
                 is_linux = sys.platform.startswith("linux")
                 launch_options = {
-    "user_data_dir": PROFILE_DIR,
-    "headless": True if is_linux else False,
-    "args": [
-        "--disable-blink-features=AutomationControlled",
-        "--no-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-infobars"
-    ],
-    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",  # 👈 1. ДОБАВЬ ЭТУ СТРОКУ
-    "viewport": {"width": 1280, "height": 720},
-    "locale": "en-IE",
-    "timezone_id": "Europe/Dublin"
-}
+                    "user_data_dir": PROFILE_DIR,
+                    "headless": True if is_linux else False,
+                    "args": [
+                        "--disable-blink-features=AutomationControlled",
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--disable-infobars"
+                    ],
+                    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                    "viewport": {"width": 1280, "height": 720},
+                    "locale": "en-IE",
+                    "timezone_id": "Europe/Dublin"
+                }
 
                 if not is_linux and os.path.exists(CHROME_PATH):
                     launch_options["executable_path"] = CHROME_PATH
@@ -777,14 +719,13 @@ async def sites_parser_loop():
                 context = await p.chromium.launch_persistent_context(**launch_options)
                 page = context.pages[0] if context.pages else await context.new_page()
 
-                while True:
-                    await parse_daft(page, seen_urls)
-                    await parse_rent(page, seen_urls)
-                    
-                    sleep_time = random.randint(240, 360) 
-                    print(f"\n[*] Все сайты проверены. Спим {sleep_time // 60} минут...")
-                    print("="*60)
-                    await asyncio.sleep(sleep_time)
+                await parse_rent(page, seen_urls)
+                await context.close()
+
+            sleep_time = random.randint(240, 360) 
+            print(f"\n[*] Все сайты проверены. Спим {sleep_time // 60} минут...")
+            print("="*60)
+            await asyncio.sleep(sleep_time)
 
         except Exception as e:
             print(f"[⚠️] Ошибка парсера сайтов ({e}). Перезапуск через 10 секунд...")
@@ -796,7 +737,7 @@ async def sites_parser_loop():
 async def main():
     init_db()
     asyncio.create_task(sites_parser_loop())
-    asyncio.create_task(auto_clean_old_listings()) # 👈 ДОБАВИТЬ ЭТУ строчку
+    asyncio.create_task(auto_clean_old_listings())
     print("🚀 Ультимативный Бот с автоочисткой базы запущен!")
     await dp.start_polling(bot)
 
