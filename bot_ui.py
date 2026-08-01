@@ -536,12 +536,19 @@ async def unknown(message: types.Message):
 # ==========================================
 
 async def parse_daft(page, seen_urls):
+    # ПЕРЕХОДИМ НА DAFT, ЧТОБЫ ОБОЙТИ CORS И ПОЛУЧИТЬ КУКИ!
+    try:
+        await page.goto("https://www.daft.ie/", wait_until="domcontentloaded", timeout=30000)
+    except Exception:
+        pass
+
     api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
     headers = {
         "Content-Type": "application/json",
         "Brand": "daft",
         "Platform": "web"
     }
+    
 
     search_configs = [
         {"name": "Wexford (Комнаты)", "section": "sharing", "county": "wexford"},
@@ -719,11 +726,7 @@ async def sites_parser_loop():
                 page = context.pages[0] if context.pages else await context.new_page()
 
                 # Сначала наносим визит на Daft.ie, чтобы сформировать нормальный сессионный контекст
-                try:
-                    await page.goto("https://www.daft.ie/", wait_until="domcontentloaded", timeout=30000)
-                    await page.wait_for_timeout(2000)
-                except Exception:
-                    pass
+               
 
                 # Теперь шлем API-запросы через наш замаскированный Chromium
                 await parse_daft(page, seen_urls)
