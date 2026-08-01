@@ -536,6 +536,7 @@ async def unknown(message: types.Message):
 # ==========================================
 
 async def parse_daft(seen_urls):
+    PROXY_URL = "http://104.194.146.9:80"
     api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -568,7 +569,15 @@ async def parse_daft(seen_urls):
         try:
             def fetch_api():
                 s = requests.Session()
-                return s.post(api_url, json=payload, headers=headers, impersonate="chrome124", timeout=15)
+                proxies = {"http": "http://104.194.146.9:80", "https": "http://104.194.146.9:80"}
+                return s.post(
+                    api_url, 
+                    json=payload, 
+                    headers=headers, 
+                    proxies=proxies, 
+                    impersonate="chrome124", 
+                    timeout=15
+    )           
             
             response = await asyncio.to_thread(fetch_api)
             
