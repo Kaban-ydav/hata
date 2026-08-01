@@ -565,8 +565,13 @@ async def parse_daft(page, seen_urls):
         }
 
         try:
-            # Запрос выполняется через браузерный контекст Playwright!
-            response = await page.request.post(api_url, data=payload, headers=headers, timeout=15000)
+            # Запрос уходит прямо из браузера (со всеми Cloudflare-токенами)!
+            response = await page.request.post(
+                api_url,
+                data=payload,
+                headers=headers,
+                timeout=15000
+            )
             
             if response.status != 200:
                 print(f"[!] API ответил кодом {response.status} на {config['name']}")
