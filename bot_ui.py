@@ -538,53 +538,62 @@ async def unknown(message: types.Message):
 # ==========================================
 # 🕵️‍♂️ ПАРСЕРЫ САЙТОВ (Daft.ie + Rent.ie)
 # ==========================================
+import requests
+
 async def parse_daft(page, seen_urls):
-    urls_daft = {
-        "Wexford (Комнаты)": "https://www.daft.ie/sharing/wexford-county?sort=publishDateDesc",
-        "Wexford (Целиком)": "https://www.daft.ie/property-for-rent/wexford-county?sort=publishDateDesc",
-        "Waterford (Комнаты)": "https://www.daft.ie/sharing/waterford-county?sort=publishDateDesc",
-        "Waterford (Целиком)": "https://www.daft.ie/property-for-rent/waterford-county?sort=publishDateDesc",
-        "Galway (Комнаты)": "https://www.daft.ie/sharing/galway-county?sort=publishDateDesc",
-        "Galway (Целиком)": "https://www.daft.ie/property-for-rent/galway-county?sort=publishDateDesc",
-        "Ireland (Все свежие)": "https://www.daft.ie/sharing/ireland?sort=publishDateDesc"
+    # Прямой API-эндпоинт Daft.ie
+    api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Content-Type": "application/json",
+        "Brand": "daft",
+        "Platform": "web"
     }
 
-    try:
-        for location, url in urls_daft.items():
-            print(f"[*] Сканируем Daft.ie -> {location}...")
-            await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+    # Настройки поиска по графствам
+    search_configs = [
+        {"name": "Wexford (Комнаты)", "section": "sharing", "county": "wexford"},
+        {"name": "Wexford (Целиком)", "section": "residential-to-let", "county": "wexford"},
+        {"name": "Waterford (Комнаты)", "section": "sharing", "county": "waterford"},
+        {"name": "Waterford (Целиком)", "section": "residential-to-let", "county": "waterford"},
+        {"name": "Galway (Комнаты)", "section": "sharing", "county": "galway"},
+        {"name": "Galway (Целиком)", "section": "residential-to-let", "county": "galway"},
+    ]
+
+    for config in search_configs:
+        print(f"[*] Сканируем Daft.ie API -> {config['name']}...")
+        
+        payload = {
+            "section": config["section"],
+            "filters": [
+                {"name": "county", "values": [config["county"]]}
+            ],
+            "paging": {"from": "0", "size": "20"},
+            "sort": "publishDateDesc"
+        }
+
+        try:
+            response = await asyncio.to_thread(requests.post, api_url, json=payload, headers=headers, timeout=15)
             
-            # Эмуляция человеческого поведения (скролл и случайная пауза)
-            await page.evaluate("window.scrollBy(0, 300)")
-            await page.wait_for_timeout(random.randint(3000, 5000))
-
-            html = await page.content()
-            soup = BeautifulSoup(html, "html.parser")
-
-            next_data_script = soup.find("script", id="__NEXT_DATA__")
-            if not next_data_script or not next_data_script.string:
-                print(f"[-] Cloudflare или нет данных на {location}")
+            if response.status_code != 200:
+                print(f"[!] API ответил кодом {response.status_code} на {config['name']}")
                 continue
 
-            try:
-                data = json.loads(next_data_script.string)
-                listings = data["props"]["pageProps"]["listings"]
-            except Exception:
-                continue
+            data = response.json()
+            listings = data.get("listings", [])
 
             if not listings:
+                print(f"[-] Нет данных в API для {config['name']}")
                 continue
 
-            print(f"[+] Найдено {len(listings)} вариантов на {location}")
+            print(f"[+] API вернул {len(listings)} объявлений для {config['name']}!")
 
             for item in listings:
-                listing_data = item.get("listing")
-                if not listing_data:
-                    continue
-
+                listing_data = item.get("listing", {})
+                seo_path = listing_data.get("seoFriendlyPath", "")
                 price_text = listing_data.get("price", "").lower()
                 address = listing_data.get("title", "Адрес не указан")
-                seo_path = listing_data.get("seoFriendlyPath", "")
                 room_type = str(listing_data.get("numBedrooms", "Не указано"))
 
                 if not seo_path or not price_text:
@@ -597,18 +606,14 @@ async def parse_daft(page, seen_urls):
                 except ValueError:
                     continue
 
-                if "week" in price_text:
+                if "week" in price_text or "pw" in price_text:
                     monthly_price = int(price_digits * 4.33)
                     display_price = f"{price_text} (~€{monthly_price}/мес)"
                 else:
                     monthly_price = price_digits
                     display_price = price_text
 
-                address_lower = address.lower()
-                if "room" in address_lower or "share" in address_lower or "sharing" in address_lower or monthly_price < 650:
-                    is_whole_property_flag = False
-                else:
-                    is_whole_property_flag = "Целиком" in location
+                is_whole_property_flag = config["section"] == "residential-to-let"
 
                 save_listing_to_db("Daft", address, monthly_price, display_price, full_url, is_whole_property_flag, room_type)
 
@@ -626,8 +631,10 @@ async def parse_daft(page, seen_urls):
                     save_new_url(full_url)
                     seen_urls.add(full_url)
 
-    except Exception as e:
-        print(f"[!] Ошибка Daft: {e}")
+            await asyncio.sleep(1)
+
+        except Exception as e:
+            print(f"[!] Ошибка API Daft: {e}")
 
 
 async def sites_parser_loop():
