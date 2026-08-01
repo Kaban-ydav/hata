@@ -565,19 +565,21 @@ async def parse_daft(page, seen_urls):
         }
 
         try:
-            # Запрос уходит прямо из браузера (со всеми Cloudflare-токенами)!
-            response = await page.request.post(
-                api_url,
-                data=payload,
-                headers=headers,
-                timeout=15000
-            )
+            # Выполняем нативный fetch прямо из браузерной консоли!
+            data = await page.evaluate('''async (args) => {
+                const res = await fetch(args.url, {
+                    method: 'POST',
+                    headers: args.headers,
+                    body: JSON.stringify(args.payload)
+                });
+                if (!res.ok) return { _error: res.status };
+                return await res.json();
+            }''', {"url": api_url, "headers": headers, "payload": payload})
             
-            if response.status != 200:
-                print(f"[!] API ответил кодом {response.status} на {config['name']}")
+            if "_error" in data:
+                print(f"[!] API ответил кодом {data['_error']} на {config['name']}")
                 continue
 
-            data = await response.json()
             listings = data.get("listings", [])
 
             if not listings:
