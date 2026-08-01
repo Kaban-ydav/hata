@@ -685,18 +685,19 @@ async def sites_parser_loop():
             async with async_playwright() as p:
                 is_linux = sys.platform.startswith("linux")
                 launch_options = {
-                    "user_data_dir": PROFILE_DIR,
-                    "headless": True if is_linux else False,
-                    "args": [
-                        "--disable-blink-features=AutomationControlled",
-                        "--no-sandbox",
-                        "--disable-dev-shm-usage",
-                        "--disable-infobars"
-                    ],
-                    "viewport": {"width": 1280, "height": 720},
-                    "locale": "en-IE",
-                    "timezone_id": "Europe/Dublin"
-                }
+    "user_data_dir": PROFILE_DIR,
+    "headless": True if is_linux else False,
+    "args": [
+        "--disable-blink-features=AutomationControlled",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-infobars"
+    ],
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",  # 👈 1. ДОБАВЬ ЭТУ СТРОКУ
+    "viewport": {"width": 1280, "height": 720},
+    "locale": "en-IE",
+    "timezone_id": "Europe/Dublin"
+}
 
                 if not is_linux and os.path.exists(CHROME_PATH):
                     launch_options["executable_path"] = CHROME_PATH
