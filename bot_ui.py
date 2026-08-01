@@ -547,7 +547,7 @@ async def parse_daft(page, seen_urls):
     api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
     
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Brand": "daft",
         "Platform": "web"
@@ -575,15 +575,12 @@ async def parse_daft(page, seen_urls):
         }
 
         try:
-            # Делаем запрос с эмуляцией Chrome напрямую через curl_cffi
-            response = await asyncio.to_thread(
-                requests.post,
-                api_url,
-                json=payload,
-                headers=headers,
-                impersonate="chrome110",
-                timeout=15
-            )
+            # Создаем сессию с маскировкой под Chrome 124
+            def fetch_api():
+                s = requests.Session()
+                return s.post(api_url, json=payload, headers=headers, impersonate="chrome124", timeout=15)
+
+            response = await asyncio.to_thread(fetch_api)
             
             if response.status_code != 200:
                 print(f"[!] API ответил кодом {response.status_code} на {config['name']}")
@@ -632,7 +629,7 @@ async def parse_daft(page, seen_urls):
                         f"🚨 *Найдено на Daft.ie!*\n\n"
                         f"📌 *Тип:* {prop_badge}\n"
                         f"🏠 *Адрес:* {address}\n"
-                        f"| Спальни:* {room_type}\n"
+                        f"🛏️ *Спальни:* {room_type}\n"
                         f"💰 *Цена:* {display_price}\n\n"
                         f"🔗 [ОТКРЫТЬ ОБЪЯВЛЕНИЕ]({full_url})"
                     )
