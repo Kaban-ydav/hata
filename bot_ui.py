@@ -13,7 +13,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemo
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-
+import sys
 # === НАСТРОЙКИ ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 
@@ -683,15 +683,25 @@ async def sites_parser_loop():
     while True:
         try:
             async with async_playwright() as p:
-                context = await p.chromium.launch_persistent_context(
-                    user_data_dir=PROFILE_DIR,
-                    executable_path=CHROME_PATH,
-                    headless=False,
-                    args=["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-infobars"],
-                    viewport={"width": 1280, "height": 720},
-                    locale="en-IE",
-                    timezone_id="Europe/Dublin"
-                )
+                is_linux = sys.platform.startswith("linux")
+                launch_options = {
+                    "user_data_dir": PROFILE_DIR,
+                    "headless": True if is_linux else False,
+                    "args": [
+                        "--disable-blink-features=AutomationControlled",
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--disable-infobars"
+                    ],
+                    "viewport": {"width": 1280, "height": 720},
+                    "locale": "en-IE",
+                    "timezone_id": "Europe/Dublin"
+                }
+
+                if not is_linux and os.path.exists(CHROME_PATH):
+                    launch_options["executable_path"] = CHROME_PATH
+
+                context = await p.chromium.launch_persistent_context(**launch_options)
                 page = context.pages[0] if context.pages else await context.new_page()
 
                 while True:
