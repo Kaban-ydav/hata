@@ -15,7 +15,6 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from curl_cffi import requests
-
 # === НАСТРОЙКИ ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 
@@ -534,9 +533,9 @@ async def unknown(message: types.Message):
 # ==========================================
 # 🕵️‍♂️ ПАРСЕРЫ САЙТОВ (Daft.ie API + Rent.ie Playwright)
 # ==========================================
+PROXY_URL = "http://qdonobox:9i6c55q41dzm@31.59.20.176:6754"
 
 async def parse_daft(seen_urls):
-    PROXY_URL = "http://104.194.146.9:80"
     api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -567,18 +566,19 @@ async def parse_daft(seen_urls):
         }
 
         try:
+            # fetch_api объявляем СТРОГО ПОСЛЕ создания payload для конкретного config!
             def fetch_api():
                 s = requests.Session()
-                proxies = {"http": "http://104.194.146.9:80", "https": "http://104.194.146.9:80"}
+                proxies = {"http": PROXY_URL, "https": PROXY_URL}
                 return s.post(
-                    api_url, 
-                    json=payload, 
-                    headers=headers, 
-                    proxies=proxies, 
-                    impersonate="chrome124", 
+                    api_url,
+                    json=payload,
+                    headers=headers,
+                    proxies=proxies,
+                    impersonate="chrome124",
                     timeout=15
-    )           
-            
+                )
+
             response = await asyncio.to_thread(fetch_api)
             
             if response.status_code != 200:
@@ -640,7 +640,6 @@ async def parse_daft(seen_urls):
 
         except Exception as e:
             print(f"[!] Ошибка API Daft: {e}")
-
 async def parse_rent(page, seen_urls):
     url_rent = "https://www.rent.ie/rooms-to-rent/ireland/"
     print("[*] Проверяем Rent.ie...")
@@ -710,6 +709,7 @@ async def sites_parser_loop():
                 launch_options = {
                     "user_data_dir": PROFILE_DIR,
                     "headless": True if is_linux else False,
+                    "proxy": {"server": PROXY_URL},
                     "args": [
                         "--disable-blink-features=AutomationControlled",
                         "--no-sandbox",
