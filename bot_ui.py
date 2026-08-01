@@ -14,6 +14,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 import sys
+from playwright_stealth import stealth_async
 # === НАСТРОЙКИ ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 
@@ -662,6 +663,10 @@ async def sites_parser_loop():
                 
                 # Маскируем webdriver
                 page = context.pages[0] if context.pages else await context.new_page()
+                context = await p.chromium.launch_persistent_context(**launch_options)
+
+                page = context.pages[0] if context.pages else await context.new_page()
+                await stealth_async(page)  # 👈 Вот сюда вставляем!
                 await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
                 while True:
