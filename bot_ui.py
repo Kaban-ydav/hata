@@ -574,7 +574,7 @@ async def parse_daft(page, seen_urls):
         }
 
         try:
-            response = await asyncio.to_thread(requests.post, api_url, json=payload, headers=headers, timeout=15)
+            response = await asyncio.to_thread(requests.post, api_url, json=payload, headers=headers, impersonate="chrome110", timeout=15)
             
             if response.status_code != 200:
                 print(f"[!] API ответил кодом {response.status_code} на {config['name']}")
