@@ -416,40 +416,45 @@ async def show_filters(message: types.Message):
 
 # ==========================================
 # 🕵️‍♂️ ПАРСЕРЫ
+# ==========================================# ==========================================
+# 🕵️‍♂️ ПАРСЕРЫ
 # ==========================================
-async def parse_daft(seen_urls):
-    api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Brand": "daft",
-        "Platform": "web"
-    }
-
+async def parse_daft(page, seen_urls):
     configs = [
-        {"name": "Wexford (Комнаты)", "section": "sharing", "county": "wexford"},
-        {"name": "Wexford (Целиком)", "section": "residential-to-let", "county": "wexford"},
-        {"name": "Waterford (Комнаты)", "section": "sharing", "county": "waterford"},
-        {"name": "Waterford (Целиком)", "section": "residential-to-let", "county": "waterford"},
-        {"name": "Galway (Комнаты)", "section": "sharing", "county": "galway"},
-        {"name": "Galway (Целиком)", "section": "residential-to-let", "county": "galway"}
+        {"name": "Wexford (Комнаты)", "url": "https://www.daft.ie/sharing/wexford", "is_whole": False},
+        {"name": "Wexford (Целиком)", "url": "https://www.daft.ie/property-for-rent/wexford", "is_whole": True},
+        {"name": "Waterford (Комнаты)", "url": "https://www.daft.ie/sharing/waterford", "is_whole": False},
+        {"name": "Waterford (Целиком)", "url": "https://www.daft.ie/property-for-rent/waterford", "is_whole": True},
+        {"name": "Galway (Комнаты)", "url": "https://www.daft.ie/sharing/galway", "is_whole": False},
+        {"name": "Galway (Целиком)", "url": "https://www.daft.ie/property-for-rent/galway", "is_whole": True}
     ]
 
     for config in configs:
-        print(f"[*] Сканируем Daft API -> {config['name']}...")
-        payload = {"section": config["section"], "filters": [{"name": "county", "values": [config["county"]]}], "paging": {"from": "0", "size": "20"}, "sort": "publishDateDesc"}
+        print(f"[*] Сканируем Daft (HTML) -> {config['name']}...")
         
         try:
-            def fetch_api():
-                return requests.post(api_url, json=payload, headers=headers, proxies={"http": PROXY_URL, "https": PROXY_URL}, impersonate="chrome124", timeout=15)
+            # Имитируем обычный заход человека на страницу поиска
+            await page.goto(config["url"], wait_until="domcontentloaded", timeout=45000)
+            await asyncio.sleep(random.uniform(3, 5)) # Даем Cloudflare подумать
 
-            res = await asyncio.to_thread(fetch_api)
-            if res.status_code != 200:
-                print(f"[!] API ответил кодом {res.status_code} на {config['name']}")
+            # Вытаскиваем скрытый JSON прямо из исходного кода страницы
+            json_text = await page.evaluate('''() => {
+                const el = document.getElementById('__NEXT_DATA__');
+                return el ? el.textContent : null;
+            }''')
+
+            if not json_text:
+                print(f"[-] Не удалось загрузить данные для {config['name']} (возможно капча)")
                 continue
 
-            listings = res.json().get("listings", [])
-            print(f"[+] API вернул {len(listings)} объявлений для {config['name']}!")
+            data = json.loads(json_text)
+            
+            try:
+                listings = data['props']['pageProps']['searchResult']['listings']
+            except KeyError:
+                listings = []
+
+            print(f"[+] Из HTML вытащено {len(listings)} объявлений для {config['name']}!")
 
             for item in listings:
                 l_data = item.get("listing", {})
@@ -463,7 +468,7 @@ async def parse_daft(seen_urls):
                     d_price = f"{price_text} (~€{m_price}/мес)" if "week" in price_text or "pw" in price_text else price_text
                 except ValueError: continue
 
-                is_whole = config["section"] == "residential-to-let"
+                is_whole = config["is_whole"]
                 save_listing_to_db("Daft", l_data.get("title", ""), m_price, d_price, full_url, is_whole, str(l_data.get("numBedrooms", "")))
 
                 if full_url not in seen_urls:
@@ -471,9 +476,11 @@ async def parse_daft(seen_urls):
                     await broadcast_message(msg, m_price, l_data.get("title", ""), is_whole)
                     save_new_url(full_url)
                     seen_urls.add(full_url)
+                    
             await asyncio.sleep(2)
+            
         except Exception as e:
-            print(f"[!] Ошибка API Daft: {e}")
+            print(f"[!] Ошибка парсинга Daft: {e}")
 
 async def parse_rent(page, seen_urls):
     print("[*] Проверяем Rent.ie...")
@@ -511,7 +518,7 @@ async def sites_parser_loop():
     seen_urls = load_seen_urls()
     while True:
         try:
-            await parse_daft(seen_urls)
+            # Запускаем браузер 1 раз и скармливаем его обоим сайтам
             async with async_playwright() as p:
                 browser = await p.chromium.launch(
                     headless=sys.platform.startswith("linux"),
@@ -520,7 +527,10 @@ async def sites_parser_loop():
                 )
                 context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36")
                 page = await context.new_page()
+                
+                await parse_daft(page, seen_urls)
                 await parse_rent(page, seen_urls)
+                
                 await browser.close()
             
             sleep_t = random.randint(240, 360) 
