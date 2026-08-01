@@ -1,0 +1,5 @@
+daft_real_chrome_profile/
+fb_chrome_profile/
+__pycache__/
+*.db
+*.txt
