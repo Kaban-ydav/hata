@@ -534,17 +534,15 @@ async def unknown(message: types.Message):
 # ==========================================
 # 🕵️‍♂️ ПАРСЕРЫ САЙТОВ (Daft.ie API via Playwright + Rent.ie)
 # ==========================================
-async def parse_daft(page, seen_urls):
-    print("🌐 Идём на Daft.ie забирать пропуск от Cloudflare...")
-    try:
-        # Заходим на сайт, чтобы пройти Cloudflare и обойти CORS
-        await page.goto("https://www.daft.ie/property-for-rent/ireland", wait_until="domcontentloaded", timeout=60000)
-        await page.wait_for_timeout(6000) # Ждем загрузки кукисов
-    except Exception as e:
-        print(f"[!] Предупреждение при загрузке главной Daft: {e}")
+PROXY_URL = "http://qdonobox:9i6c55q41dzm@31.59.20.176:6754"
 
+# ==========================================
+# 1. ПАРСЕР DAFT (ЧИСТЫЙ API + CURL_CFFI)
+# ==========================================
+async def parse_daft(seen_urls):
     api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
     headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Brand": "daft",
         "Platform": "web"
@@ -572,23 +570,24 @@ async def parse_daft(page, seen_urls):
         }
 
         try:
-            # Выполняем 100% нативный запрос прямо в консоли браузера!
-            # Так как мы уже на Daft.ie, CORS нас не заблочит, а Cloudflare увидит реальный JS.
-            data = await page.evaluate('''async (args) => {
-                const res = await fetch(args.url, {
-                    method: 'POST',
-                    headers: args.headers,
-                    body: JSON.stringify(args.payload)
-                });
-                if (!res.ok) return { _error: res.status };
-                return await res.json();
-            }''', {"url": api_url, "headers": headers, "payload": payload})
+            def fetch_api():
+                # Бьем напрямую через curl_cffi с обходом TLS Cloudflare + твой прокси
+                return requests.post(
+                    api_url,
+                    json=payload,
+                    headers=headers,
+                    proxies={"http": PROXY_URL, "https": PROXY_URL},
+                    impersonate="chrome124",
+                    timeout=15
+                )
+
+            response = await asyncio.to_thread(fetch_api)
             
-            if "_error" in data:
-                print(f"[!] API ответил кодом {data['_error']} на {config['name']}")
-                await asyncio.sleep(2)
+            if response.status_code != 200:
+                print(f"[!] API ответил кодом {response.status_code} на {config['name']}")
                 continue
 
+            data = response.json()
             listings = data.get("listings", [])
 
             if not listings:
@@ -639,11 +638,60 @@ async def parse_daft(page, seen_urls):
                     save_new_url(full_url)
                     seen_urls.add(full_url)
 
-            # Обязательная пауза, чтобы не спамить и не словить бан
             await asyncio.sleep(2)
 
         except Exception as e:
             print(f"[!] Ошибка API Daft: {e}")
+
+# ==========================================
+# 2. ГЛАВНЫЙ ЦИКЛ ПАРСИНГА
+# ==========================================
+async def sites_parser_loop():
+    print("🚀 Фоновый парсер сайтов (Daft + Rent) запущен!")
+    seen_urls = load_seen_urls()
+
+    while True:
+        try:
+            # 1. Парсим Daft (быстро, легко, без браузера)
+            await parse_daft(seen_urls)
+
+            # 2. Парсим Rent (нужен браузер, так как там чистый HTML)
+            async with async_playwright() as p:
+                is_linux = sys.platform.startswith("linux")
+                launch_options = {
+                    "user_data_dir": PROFILE_DIR,
+                    "headless": True if is_linux else False,
+                    "proxy": {"server": PROXY_URL},
+                    "args": [
+                        "--disable-blink-features=AutomationControlled",
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--disable-infobars"
+                    ],
+                    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                    "viewport": {"width": 1280, "height": 720},
+                    "locale": "en-IE",
+                    "timezone_id": "Europe/Dublin"
+                }
+
+                if not is_linux and os.path.exists(CHROME_PATH):
+                    launch_options["executable_path"] = CHROME_PATH
+
+                context = await p.chromium.launch_persistent_context(**launch_options)
+                page = context.pages[0] if context.pages else await context.new_page()
+
+                await parse_rent(page, seen_urls)
+                
+                await context.close()
+
+            sleep_time = random.randint(240, 360) 
+            print(f"\n[*] Все сайты проверены. Спим {sleep_time // 60} минут...")
+            print("="*60)
+            await asyncio.sleep(sleep_time)
+
+        except Exception as e:
+            print(f"[⚠️] Ошибка парсера сайтов ({e}). Перезапуск через 10 секунд...")
+            await asyncio.sleep(10)
 
 async def parse_rent(page, seen_urls):
     url_rent = "https://www.rent.ie/rooms-to-rent/ireland/"
