@@ -5,7 +5,9 @@ import random
 import sqlite3
 import logging
 import json
+import sys
 from bs4 import BeautifulSoup
+from playwright.async_api import async_playwright
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import CommandStart
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
@@ -17,6 +19,9 @@ from curl_cffi import requests
 # === НАСТРОЙКИ ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 PROXY_URL = "http://qdonobox:9i6c55q41dzm@31.59.20.176:6754"
+# Если прокси не работает – закомментируйте следующую строку и раскомментируйте пустой словарь
+# PROXY_CONFIG = {"server": PROXY_URL}
+PROXY_CONFIG = None  # временно отключаем для теста
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(CURRENT_DIR, "seen_daft_urls.txt")
@@ -412,131 +417,157 @@ async def show_filters(message: types.Message):
     if not f: return await message.answer("Нажми «Подписаться».")
     await message.answer(f"💰 Бюджет: {f['max_price']} €/мес\n📍 Локации: {', '.join(f['locations']).title()}\n🏠 Тип: {f['property_type']}", reply_markup=main_menu)
 
-
 # ==========================================
-# 🕵️‍♂️ ПАРСЕРЫ (ЧИСТЫЙ И БЫСТРЫЙ HTML)
+# 🕵️‍♂️ ПАРСЕРЫ (ПЕРЕПИСАНЫ С RETRY)
 # ==========================================
-async def parse_daft(seen_urls):
+async def parse_daft(page, seen_urls):
     configs = [
-        {"name": "Wexford (Комнаты)", "url": "https://www.daft.ie/sharing/wexford?sort=publishDateDesc", "is_whole": False},
-        {"name": "Wexford (Целиком)", "url": "https://www.daft.ie/property-for-rent/wexford?sort=publishDateDesc", "is_whole": True},
-        {"name": "Waterford (Комнаты)", "url": "https://www.daft.ie/sharing/waterford?sort=publishDateDesc", "is_whole": False},
-        {"name": "Waterford (Целиком)", "url": "https://www.daft.ie/property-for-rent/waterford?sort=publishDateDesc", "is_whole": True},
-        {"name": "Galway (Комнаты)", "url": "https://www.daft.ie/sharing/galway?sort=publishDateDesc", "is_whole": False},
-        {"name": "Galway (Целиком)", "url": "https://www.daft.ie/property-for-rent/galway?sort=publishDateDesc", "is_whole": True}
+        {"name": "Wexford (Комнаты)", "url": "https://www.daft.ie/sharing/wexford", "is_whole": False},
+        {"name": "Wexford (Целиком)", "url": "https://www.daft.ie/property-for-rent/wexford", "is_whole": True},
+        {"name": "Waterford (Комнаты)", "url": "https://www.daft.ie/sharing/waterford", "is_whole": False},
+        {"name": "Waterford (Целиком)", "url": "https://www.daft.ie/property-for-rent/waterford", "is_whole": True},
+        {"name": "Galway (Комнаты)", "url": "https://www.daft.ie/sharing/galway", "is_whole": False},
+        {"name": "Galway (Целиком)", "url": "https://www.daft.ie/property-for-rent/galway", "is_whole": True}
     ]
 
     for config in configs:
         print(f"[*] Сканируем Daft (HTML) -> {config['name']}...")
-        try:
-            def fetch_daft():
-                return requests.get(
-                    config["url"], 
-                    proxies={"http": PROXY_URL, "https": PROXY_URL}, 
-                    impersonate="chrome124", 
-                    timeout=30
-                )
-            
-            res = await asyncio.to_thread(fetch_daft)
-            
-            if res.status_code != 200:
-                print(f"[!] Daft ответил кодом {res.status_code}")
-                continue
+        
+        for attempt in range(1, 4):  # 3 попытки
+            try:
+                # Переход с увеличенным таймаутом
+                await page.goto(config["url"], wait_until="domcontentloaded", timeout=90000)
+                # Ждём появления элемента с данными (max 30 сек)
+                await page.wait_for_selector('#__NEXT_DATA__', timeout=30000)
+                await asyncio.sleep(random.uniform(2, 4))
 
-            soup = BeautifulSoup(res.text, "html.parser")
-            script_tag = soup.find("script", id="__NEXT_DATA__")
-            
-            if not script_tag:
-                print(f"[-] Не найден JSON на странице {config['name']} (Возможно блок Cloudflare)")
-                continue
+                json_text = await page.evaluate('''() => {
+                    const el = document.getElementById('__NEXT_DATA__');
+                    return el ? el.textContent : null;
+                }''')
 
-            data = json.loads(script_tag.string)
-            listings = data.get('props', {}).get('pageProps', {}).get('searchResult', {}).get('listings', [])
+                if not json_text:
+                    raise Exception("__NEXT_DATA__ not found")
 
-            print(f"[+] Из HTML вытащено {len(listings)} объявлений для {config['name']}!")
-
-            for item in listings:
-                l_data = item.get("listing", {})
-                seo_path = l_data.get("seoFriendlyPath", "")
-                price_text = l_data.get("price", "").lower()
-                
-                if not seo_path or not price_text: 
-                    continue
-                
-                full_url = "https://www.daft.ie" + seo_path
+                data = json.loads(json_text)
                 try:
-                    p_digits = int(''.join(filter(str.isdigit, price_text)))
-                    m_price = int(p_digits * 4.33) if "week" in price_text or "pw" in price_text else p_digits
-                    d_price = f"{price_text} (~€{m_price}/мес)" if "week" in price_text or "pw" in price_text else price_text
-                except ValueError: 
-                    continue
+                    listings = data['props']['pageProps']['searchResult']['listings']
+                except KeyError:
+                    listings = []
 
-                is_whole = config["is_whole"]
-                save_listing_to_db("Daft", l_data.get("title", ""), m_price, d_price, full_url, is_whole, str(l_data.get("numBedrooms", "")))
+                print(f"[+] Из HTML вытащено {len(listings)} объявлений для {config['name']}!")
 
-                if full_url not in seen_urls:
-                    msg = f"🚨 *Найдено на Daft!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Адрес:* {l_data.get('title', '')}\n💰 *Цена:* {d_price}\n🔗 [ОТКРЫТЬ]({full_url})"
-                    await broadcast_message(msg, m_price, l_data.get("title", ""), is_whole)
-                    save_new_url(full_url)
-                    seen_urls.add(full_url)
-                    
-            await asyncio.sleep(2)
-        except Exception as e:
-            print(f"[!] Ошибка парсинга Daft: {e}")
+                for item in listings:
+                    l_data = item.get("listing", {})
+                    seo_path, price_text = l_data.get("seoFriendlyPath", ""), l_data.get("price", "").lower()
+                    if not seo_path or not price_text: continue
+                    full_url = "https://www.daft.ie" + seo_path
+                    try:
+                        p_digits = int(''.join(filter(str.isdigit, price_text)))
+                        m_price = int(p_digits * 4.33) if "week" in price_text or "pw" in price_text else p_digits
+                        d_price = f"{price_text} (~€{m_price}/мес)" if "week" in price_text or "pw" in price_text else price_text
+                    except ValueError:
+                        continue
 
-async def parse_rent(seen_urls):
+                    is_whole = config["is_whole"]
+                    save_listing_to_db("Daft", l_data.get("title", ""), m_price, d_price, full_url, is_whole, str(l_data.get("numBedrooms", "")))
+
+                    if full_url not in seen_urls:
+                        msg = f"🚨 *Найдено на Daft!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Адрес:* {l_data.get('title', '')}\n💰 *Цена:* {d_price}\n🔗 [ОТКРЫТЬ]({full_url})"
+                        await broadcast_message(msg, m_price, l_data.get("title", ""), is_whole)
+                        save_new_url(full_url)
+                        seen_urls.add(full_url)
+                
+                # Успешно – выходим из retry
+                break
+
+            except Exception as e:
+                print(f"[!] Ошибка парсинга Daft (попытка {attempt}/3): {e}")
+                if attempt == 3:
+                    print(f"[-] Не удалось обработать {config['name']} после 3 попыток.")
+                else:
+                    wait = attempt * 10
+                    print(f"[*] Повтор через {wait} секунд...")
+                    await asyncio.sleep(wait)
+                    # Перезагружаем страницу (опционально)
+                    try:
+                        await page.reload(timeout=60000)
+                    except:
+                        pass
+        await asyncio.sleep(2)
+
+async def parse_rent(page, seen_urls):
     print("[*] Проверяем Rent.ie...")
-    try:
-        def fetch_rent():
-            return requests.get(
-                "https://www.rent.ie/rooms-to-rent/ireland/", 
-                proxies={"http": PROXY_URL, "https": PROXY_URL}, 
-                impersonate="chrome124", 
-                timeout=30
-            )
+    for attempt in range(1, 4):
+        try:
+            await page.goto("https://www.rent.ie/rooms-to-rent/ireland/", wait_until="domcontentloaded", timeout=90000)
+            await page.wait_for_timeout(random.randint(3000, 5000))
+            soup = BeautifulSoup(await page.content(), "html.parser")
+            cards = soup.find_all("div", class_=lambda c: c and "search-result" in c)
             
-        res = await asyncio.to_thread(fetch_rent)
-        
-        if res.status_code != 200:
-            print(f"[!] Rent.ie ответил кодом {res.status_code}")
-            return
-            
-        soup = BeautifulSoup(res.text, "html.parser")
-        cards = soup.find_all("div", class_=lambda c: c and "search-result" in c)
-        
-        if not cards: 
-            return print("[-] На Rent.ie пока нет карточек.")
-            
-        print(f"[+] Найдено на Rent.ie: {len(cards)}")
+            if not cards:
+                print("[-] На Rent.ie пока нет карточек.")
+                break  # не ошибка, просто нет объявлений
 
-        for card in cards:
-            a_tag = card.find("a", href=True)
-            if not a_tag or "/rooms-to-rent/" not in a_tag["href"]: continue
-            url = ("https://www.rent.ie" + a_tag["href"]) if not a_tag["href"].startswith("http") else a_tag["href"]
-            
-            p_match = re.search(r'€\s*(\d+)', card.get_text())
-            if not p_match: continue
-            raw_p = int(p_match.group(1))
-            is_w = any(w in card.get_text().lower() for w in ["week", "pw", "w/k"])
-            m_price = int(raw_p * 4.33) if is_w else raw_p
-            d_price = f"€{raw_p}/нед (~€{m_price}/мес)" if is_w else f"€{raw_p}/мес"
-            address = a_tag.get_text(strip=True) or "Ireland"
+            print(f"[+] Найдено на Rent.ie: {len(cards)}")
 
-            save_listing_to_db("Rent.ie", address, m_price, d_price, url, False, "Комната")
-            if url not in seen_urls:
-                await broadcast_message(f"🚨 *Новое на Rent.ie!*\n🏠 {address}\n💰 {d_price}\n🔗 [ОТКРЫТЬ]({url})", m_price, address, False)
-                save_new_url(url)
-                seen_urls.add(url)
-    except Exception as e:
-        print(f"[!] Ошибка Rent.ie: {e}")
+            for card in cards:
+                a_tag = card.find("a", href=True)
+                if not a_tag or "/rooms-to-rent/" not in a_tag["href"]: continue
+                url = ("https://www.rent.ie" + a_tag["href"]) if not a_tag["href"].startswith("http") else a_tag["href"]
+                
+                p_match = re.search(r'€\s*(\d+)', card.get_text())
+                if not p_match: continue
+                raw_p = int(p_match.group(1))
+                is_w = any(w in card.get_text().lower() for w in ["week", "pw", "w/k"])
+                m_price, d_price = (int(raw_p * 4.33), f"€{raw_p}/нед (~€{int(raw_p * 4.33)}/мес)") if is_w else (raw_p, f"€{raw_p}/мес")
+                address = a_tag.get_text(strip=True) or "Ireland"
+
+                save_listing_to_db("Rent.ie", address, m_price, d_price, url, False, "Комната")
+                if url not in seen_urls:
+                    await broadcast_message(f"🚨 *Новое на Rent.ie!*\n🏠 {address}\n💰 {d_price}\n🔗 [ОТКРЫТЬ]({url})", m_price, address, False)
+                    save_new_url(url)
+                    seen_urls.add(url)
+            break  # успех
+
+        except Exception as e:
+            print(f"[!] Ошибка Rent.ie (попытка {attempt}/3): {e}")
+            if attempt == 3:
+                print("[-] Не удалось обработать Rent.ie после 3 попыток.")
+            else:
+                wait = attempt * 10
+                print(f"[*] Повтор через {wait} секунд...")
+                await asyncio.sleep(wait)
+                try:
+                    await page.reload(timeout=60000)
+                except:
+                    pass
 
 async def sites_parser_loop():
     print("🚀 Фоновый парсер запущен!")
     seen_urls = load_seen_urls()
     while True:
         try:
-            await parse_daft(seen_urls)
-            await parse_rent(seen_urls)
+            # Запускаем браузер с прокси (если задан) или без
+            async with async_playwright() as p:
+                launch_options = {
+                    "headless": sys.platform.startswith("linux"),
+                    "args": ["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-dev-shm-usage"]
+                }
+                if PROXY_CONFIG:
+                    launch_options["proxy"] = PROXY_CONFIG
+                browser = await p.chromium.launch(**launch_options)
+                context = await browser.new_context(
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+                )
+                # Устанавливаем глобальный таймаут для всех операций
+                context.set_default_timeout(120000)
+                page = await context.new_page()
+                
+                await parse_daft(page, seen_urls)
+                await parse_rent(page, seen_urls)
+                
+                await browser.close()
             
             sleep_t = random.randint(240, 360) 
             print(f"\n[*] Все проверено. Спим {sleep_t // 60} мин...")
