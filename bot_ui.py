@@ -534,21 +534,21 @@ async def unknown(message: types.Message):
 # ==========================================
 # 🕵️‍♂️ ПАРСЕРЫ САЙТОВ (Daft.ie API via Playwright + Rent.ie)
 # ==========================================
-
 async def parse_daft(page, seen_urls):
-    # ПЕРЕХОДИМ НА DAFT, ЧТОБЫ ОБОЙТИ CORS И ПОЛУЧИТЬ КУКИ!
-    try:
-        await page.goto("https://www.daft.ie/", wait_until="domcontentloaded", timeout=30000)
-    except Exception:
-        pass
-
     api_url = "https://gateway.daft.ie/api/v2/grouped-listings"
     headers = {
         "Content-Type": "application/json",
         "Brand": "daft",
         "Platform": "web"
     }
-    
+
+    print("🌐 Идём на Daft.ie забирать пропуск от Cloudflare...")
+    try:
+        # Сначала грузим сам сайт, чтобы Cloudflare пропустил IP и дал куки
+        await page.goto("https://www.daft.ie/property-for-rent/ireland", wait_until="domcontentloaded", timeout=60000)
+        await page.wait_for_timeout(6000) # Ждем 6 секунд, пока пройдет проверка
+    except Exception as e:
+        print(f"[!] Предупреждение при загрузке главной Daft: {e}")
 
     search_configs = [
         {"name": "Wexford (Комнаты)", "section": "sharing", "county": "wexford"},
@@ -572,21 +572,20 @@ async def parse_daft(page, seen_urls):
         }
 
         try:
-            # Выполняем нативный fetch прямо из браузерной консоли!
-            data = await page.evaluate('''async (args) => {
-                const res = await fetch(args.url, {
-                    method: 'POST',
-                    headers: args.headers,
-                    body: JSON.stringify(args.payload)
-                });
-                if (!res.ok) return { _error: res.status };
-                return await res.json();
-            }''', {"url": api_url, "headers": headers, "payload": payload})
+            # Отправляем запрос через встроенный инструмент Playwright
+            # Он автоматически прикрепит прокси и куки от Cloudflare!
+            response = await page.request.post(
+                api_url,
+                data=payload,
+                headers=headers,
+                timeout=15000
+            )
             
-            if "_error" in data:
-                print(f"[!] API ответил кодом {data['_error']} на {config['name']}")
+            if response.status != 200:
+                print(f"[!] API ответил кодом {response.status} на {config['name']}")
                 continue
 
+            data = await response.json()
             listings = data.get("listings", [])
 
             if not listings:
