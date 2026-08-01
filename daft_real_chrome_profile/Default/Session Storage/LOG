@@ -1,0 +1,35 @@
+2026/07/29-18:34:26.730 9540 Creating DB c:\Users\sekre\Downloads\OneDrive - South East Technological University\Рабочий стол\hata\daft_real_chrome_profile\Default\Session Storage since it was missing.
+2026/07/29-18:34:26.775 9540 Reusing MANIFEST c:\Users\sekre\Downloads\OneDrive - South East Technological University\Рабочий стол\hata\daft_real_chrome_profile\Default\Session Storage/MANIFEST-000001
+2026/07/29-18:34:33.254 9540 Level-0 table #5: started
+2026/07/29-18:34:33.268 9540 Level-0 table #5: 132939 bytes OK
+2026/07/29-18:34:33.274 9540 Delete type=0 #3
+2026/07/29-18:39:59.228 708c Level-0 table #7: started
+2026/07/29-18:39:59.238 708c Level-0 table #7: 20748 bytes OK
+2026/07/29-18:39:59.245 708c Delete type=0 #4
+2026/07/29-18:55:34.698 708c Level-0 table #9: started
+2026/07/29-18:55:34.709 708c Level-0 table #9: 31194 bytes OK
+2026/07/29-18:55:34.714 708c Delete type=0 #6
+2026/07/29-19:11:59.391 708c Level-0 table #11: started
+2026/07/29-19:11:59.404 708c Level-0 table #11: 33104 bytes OK
+2026/07/29-19:11:59.409 708c Delete type=0 #8
+2026/07/29-19:27:24.937 9540 Level-0 table #13: started
+2026/07/29-19:27:24.944 9540 Level-0 table #13: 30570 bytes OK
+2026/07/29-19:27:24.949 9540 Delete type=0 #10
+2026/07/29-19:38:45.174 708c Level-0 table #15: started
+2026/07/29-19:38:45.186 708c Level-0 table #15: 34734 bytes OK
+2026/07/29-19:38:45.191 708c Delete type=0 #12
+2026/07/29-19:38:45.192 708c Compacting 4@0 + 1@1 files
+2026/07/29-19:38:45.197 708c Generated table #16@0: 142 keys, 13187 bytes
+2026/07/29-19:38:45.197 708c Compacted 4@0 + 1@1 files => 13187 bytes
+2026/07/29-19:38:45.199 708c compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/07/29-19:38:45.200 708c Delete type=2 #7
+2026/07/29-19:38:45.200 708c Delete type=2 #9
+2026/07/29-19:38:45.200 708c Delete type=2 #11
+2026/07/29-19:38:45.200 708c Delete type=2 #13
+2026/07/29-19:38:45.200 708c Delete type=2 #15
+2026/07/29-19:53:11.155 708c Level-0 table #18: started
+2026/07/29-19:53:11.167 708c Level-0 table #18: 35022 bytes OK
+2026/07/29-19:53:11.170 708c Delete type=0 #14
+2026/07/29-20:26:27.854 708c Level-0 table #20: started
+2026/07/29-20:26:27.869 708c Level-0 table #20: 38132 bytes OK
+2026/07/29-20:26:27.873 708c Delete type=0 #17

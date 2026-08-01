@@ -1,0 +1,630 @@
+2026/07/27-20:29:57.069 c2a0 Reusing MANIFEST c:\Users\sekre\Downloads\OneDrive - South East Technological University\Рабочий стол\hata\daft_real_chrome_profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/07/27-20:29:57.073 c2a0 Recovering log #282
+2026/07/27-20:29:57.074 c2a0 Reusing old log c:\Users\sekre\Downloads\OneDrive - South East Technological University\Рабочий стол\hata\daft_real_chrome_profile\Default\Local Storage\leveldb/000282.log 
+2026/07/27-20:30:23.321 c2a0 Level-0 table #286: started
+2026/07/27-20:30:23.327 c2a0 Level-0 table #286: 21364 bytes OK
+2026/07/27-20:30:23.330 c2a0 Delete type=0 #282
+2026/07/27-20:36:12.743 ce24 Level-0 table #288: started
+2026/07/27-20:36:12.748 ce24 Level-0 table #288: 20658 bytes OK
+2026/07/27-20:36:12.751 ce24 Delete type=0 #285
+2026/07/27-20:36:12.752 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-20:36:12.763 ce24 Generated table #289@0: 197 keys, 333329 bytes
+2026/07/27-20:36:12.763 ce24 Compacted 4@0 + 1@1 files => 333329 bytes
+2026/07/27-20:36:12.766 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-20:36:12.766 ce24 Delete type=2 #278
+2026/07/27-20:36:12.767 ce24 Delete type=2 #281
+2026/07/27-20:36:12.767 ce24 Delete type=2 #283
+2026/07/27-20:36:12.767 ce24 Delete type=2 #286
+2026/07/27-20:36:12.767 ce24 Delete type=2 #288
+2026/07/27-20:36:17.833 c2a0 Level-0 table #291: started
+2026/07/27-20:36:17.842 c2a0 Level-0 table #291: 21480 bytes OK
+2026/07/27-20:36:17.847 c2a0 Delete type=0 #287
+2026/07/27-20:36:58.285 ce24 Level-0 table #293: started
+2026/07/27-20:36:58.296 ce24 Level-0 table #293: 20592 bytes OK
+2026/07/27-20:36:58.299 ce24 Delete type=0 #290
+2026/07/27-20:41:58.285 b2d4 Level-0 table #295: started
+2026/07/27-20:41:58.291 b2d4 Level-0 table #295: 21412 bytes OK
+2026/07/27-20:41:58.294 b2d4 Delete type=0 #292
+2026/07/27-20:47:53.994 ce24 Level-0 table #297: started
+2026/07/27-20:47:53.999 ce24 Level-0 table #297: 22589 bytes OK
+2026/07/27-20:47:54.003 ce24 Delete type=0 #294
+2026/07/27-20:47:54.003 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-20:47:54.013 ce24 Generated table #298@0: 197 keys, 333316 bytes
+2026/07/27-20:47:54.013 ce24 Compacted 4@0 + 1@1 files => 333316 bytes
+2026/07/27-20:47:54.016 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-20:47:54.016 ce24 Delete type=2 #289
+2026/07/27-20:47:54.017 ce24 Delete type=2 #291
+2026/07/27-20:47:54.017 ce24 Delete type=2 #293
+2026/07/27-20:47:54.017 ce24 Delete type=2 #295
+2026/07/27-20:47:54.017 ce24 Delete type=2 #297
+2026/07/27-20:48:02.844 c2a0 Level-0 table #300: started
+2026/07/27-20:48:02.850 c2a0 Level-0 table #300: 22152 bytes OK
+2026/07/27-20:48:02.853 c2a0 Delete type=0 #296
+2026/07/27-20:53:35.017 c2a0 Level-0 table #302: started
+2026/07/27-20:53:35.026 c2a0 Level-0 table #302: 20727 bytes OK
+2026/07/27-20:53:35.029 c2a0 Delete type=0 #299
+2026/07/27-20:53:45.463 ce24 Level-0 table #304: started
+2026/07/27-20:53:45.470 ce24 Level-0 table #304: 22137 bytes OK
+2026/07/27-20:53:45.474 ce24 Delete type=0 #301
+2026/07/27-20:58:55.590 ce24 Level-0 table #306: started
+2026/07/27-20:58:55.594 ce24 Level-0 table #306: 22742 bytes OK
+2026/07/27-20:58:55.598 ce24 Delete type=0 #303
+2026/07/27-20:58:55.599 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-20:58:55.609 ce24 Generated table #307@0: 196 keys, 333307 bytes
+2026/07/27-20:58:55.610 ce24 Compacted 4@0 + 1@1 files => 333307 bytes
+2026/07/27-20:58:55.611 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-20:58:55.611 ce24 Delete type=2 #298
+2026/07/27-20:58:55.611 ce24 Delete type=2 #300
+2026/07/27-20:58:55.611 ce24 Delete type=2 #302
+2026/07/27-20:58:55.611 ce24 Delete type=2 #304
+2026/07/27-20:58:55.611 ce24 Delete type=2 #306
+2026/07/27-20:59:06.703 ce24 Level-0 table #309: started
+2026/07/27-20:59:06.708 ce24 Level-0 table #309: 21523 bytes OK
+2026/07/27-20:59:06.713 ce24 Delete type=0 #305
+2026/07/27-21:03:49.745 ce24 Level-0 table #311: started
+2026/07/27-21:03:49.750 ce24 Level-0 table #311: 23004 bytes OK
+2026/07/27-21:03:49.753 ce24 Delete type=0 #308
+2026/07/27-21:03:58.290 ce24 Level-0 table #313: started
+2026/07/27-21:03:58.305 ce24 Level-0 table #313: 12851 bytes OK
+2026/07/27-21:03:58.309 ce24 Delete type=0 #310
+2026/07/27-21:10:05.457 ce24 Level-0 table #315: started
+2026/07/27-21:10:05.466 ce24 Level-0 table #315: 21405 bytes OK
+2026/07/27-21:10:05.469 ce24 Delete type=0 #312
+2026/07/27-21:10:05.470 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-21:10:05.479 ce24 Generated table #316@0: 200 keys, 333561 bytes
+2026/07/27-21:10:05.479 ce24 Compacted 4@0 + 1@1 files => 333561 bytes
+2026/07/27-21:10:05.482 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-21:10:05.482 ce24 Delete type=2 #307
+2026/07/27-21:10:05.483 ce24 Delete type=2 #309
+2026/07/27-21:10:05.483 ce24 Delete type=2 #311
+2026/07/27-21:10:05.483 ce24 Delete type=2 #313
+2026/07/27-21:10:05.483 ce24 Delete type=2 #315
+2026/07/27-21:10:18.382 c2a0 Level-0 table #318: started
+2026/07/27-21:10:18.388 c2a0 Level-0 table #318: 21317 bytes OK
+2026/07/27-21:10:18.391 c2a0 Delete type=0 #314
+2026/07/27-21:14:50.113 ce24 Level-0 table #320: started
+2026/07/27-21:14:50.118 ce24 Level-0 table #320: 21637 bytes OK
+2026/07/27-21:14:50.123 ce24 Delete type=0 #317
+2026/07/27-21:19:12.350 ce24 Level-0 table #322: started
+2026/07/27-21:19:12.359 ce24 Level-0 table #322: 21681 bytes OK
+2026/07/27-21:19:12.362 ce24 Delete type=0 #319
+2026/07/27-21:19:58.290 ce24 Level-0 table #324: started
+2026/07/27-21:19:58.299 ce24 Level-0 table #324: 22528 bytes OK
+2026/07/27-21:19:58.303 ce24 Delete type=0 #321
+2026/07/27-21:19:58.303 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-21:19:58.316 ce24 Generated table #325@0: 207 keys, 333857 bytes
+2026/07/27-21:19:58.316 ce24 Compacted 4@0 + 1@1 files => 333857 bytes
+2026/07/27-21:19:58.319 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-21:19:58.319 ce24 Delete type=2 #316
+2026/07/27-21:19:58.319 ce24 Delete type=2 #318
+2026/07/27-21:19:58.320 ce24 Delete type=2 #320
+2026/07/27-21:19:58.320 ce24 Delete type=2 #322
+2026/07/27-21:19:58.320 ce24 Delete type=2 #324
+2026/07/27-21:25:08.562 ce24 Level-0 table #327: started
+2026/07/27-21:25:08.571 ce24 Level-0 table #327: 20464 bytes OK
+2026/07/27-21:25:08.574 ce24 Delete type=0 #323
+2026/07/27-21:25:58.289 c2a0 Level-0 table #329: started
+2026/07/27-21:25:58.300 c2a0 Level-0 table #329: 20614 bytes OK
+2026/07/27-21:25:58.302 c2a0 Delete type=0 #326
+2026/07/27-21:29:40.976 ce24 Level-0 table #331: started
+2026/07/27-21:29:40.988 ce24 Level-0 table #331: 166695 bytes OK
+2026/07/27-21:29:40.991 ce24 Delete type=0 #328
+2026/07/27-21:29:48.008 c2a0 Level-0 table #333: started
+2026/07/27-21:29:48.012 c2a0 Level-0 table #333: 12923 bytes OK
+2026/07/27-21:29:48.016 c2a0 Delete type=0 #330
+2026/07/27-21:29:48.016 c2a0 Compacting 4@0 + 1@1 files
+2026/07/27-21:29:48.025 c2a0 Generated table #334@0: 210 keys, 334437 bytes
+2026/07/27-21:29:48.025 c2a0 Compacted 4@0 + 1@1 files => 334437 bytes
+2026/07/27-21:29:48.028 c2a0 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-21:29:48.029 c2a0 Delete type=2 #325
+2026/07/27-21:29:48.029 c2a0 Delete type=2 #327
+2026/07/27-21:29:48.029 c2a0 Delete type=2 #329
+2026/07/27-21:29:48.029 c2a0 Delete type=2 #331
+2026/07/27-21:29:48.029 c2a0 Delete type=2 #333
+2026/07/27-21:30:00.606 ce24 Level-0 table #336: started
+2026/07/27-21:30:00.611 ce24 Level-0 table #336: 21633 bytes OK
+2026/07/27-21:30:00.615 ce24 Delete type=0 #332
+2026/07/27-21:34:51.212 c2a0 Level-0 table #338: started
+2026/07/27-21:34:51.217 c2a0 Level-0 table #338: 22152 bytes OK
+2026/07/27-21:34:51.221 c2a0 Delete type=0 #335
+2026/07/27-21:39:58.288 ce24 Level-0 table #340: started
+2026/07/27-21:39:58.294 ce24 Level-0 table #340: 20808 bytes OK
+2026/07/27-21:39:58.297 ce24 Delete type=0 #337
+2026/07/27-21:40:04.706 ce24 Level-0 table #342: started
+2026/07/27-21:40:04.713 ce24 Level-0 table #342: 20133 bytes OK
+2026/07/27-21:40:04.717 ce24 Delete type=0 #339
+2026/07/27-21:40:04.717 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-21:40:04.729 ce24 Generated table #343@0: 213 keys, 334472 bytes
+2026/07/27-21:40:04.729 ce24 Compacted 4@0 + 1@1 files => 334472 bytes
+2026/07/27-21:40:04.733 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-21:40:04.734 ce24 Delete type=2 #334
+2026/07/27-21:40:04.734 ce24 Delete type=2 #336
+2026/07/27-21:40:04.734 ce24 Delete type=2 #338
+2026/07/27-21:40:04.734 ce24 Delete type=2 #340
+2026/07/27-21:40:04.734 ce24 Delete type=2 #342
+2026/07/27-21:40:15.197 ce24 Level-0 table #345: started
+2026/07/27-21:40:15.202 ce24 Level-0 table #345: 20516 bytes OK
+2026/07/27-21:40:15.206 ce24 Delete type=0 #341
+2026/07/27-21:45:09.483 ce24 Level-0 table #347: started
+2026/07/27-21:45:09.487 ce24 Level-0 table #347: 22073 bytes OK
+2026/07/27-21:45:09.491 ce24 Delete type=0 #344
+2026/07/27-21:45:17.876 ce24 Level-0 table #349: started
+2026/07/27-21:45:17.881 ce24 Level-0 table #349: 20804 bytes OK
+2026/07/27-21:45:17.885 ce24 Delete type=0 #346
+2026/07/27-21:51:36.106 c2a0 Level-0 table #351: started
+2026/07/27-21:51:36.115 c2a0 Level-0 table #351: 21985 bytes OK
+2026/07/27-21:51:36.117 c2a0 Delete type=0 #348
+2026/07/27-21:51:36.118 c2a0 Compacting 4@0 + 1@1 files
+2026/07/27-21:51:36.130 c2a0 Generated table #352@0: 229 keys, 335370 bytes
+2026/07/27-21:51:36.130 c2a0 Compacted 4@0 + 1@1 files => 335370 bytes
+2026/07/27-21:51:36.133 c2a0 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-21:51:36.133 c2a0 Delete type=2 #343
+2026/07/27-21:51:36.134 c2a0 Delete type=2 #345
+2026/07/27-21:51:36.134 c2a0 Delete type=2 #347
+2026/07/27-21:51:36.134 c2a0 Delete type=2 #349
+2026/07/27-21:51:36.134 c2a0 Delete type=2 #351
+2026/07/27-21:51:42.262 c2a0 Level-0 table #354: started
+2026/07/27-21:51:42.268 c2a0 Level-0 table #354: 20430 bytes OK
+2026/07/27-21:51:42.271 c2a0 Delete type=0 #350
+2026/07/27-21:56:45.268 ce24 Level-0 table #356: started
+2026/07/27-21:56:45.275 ce24 Level-0 table #356: 21513 bytes OK
+2026/07/27-21:56:45.279 ce24 Delete type=0 #353
+2026/07/27-21:56:58.290 ce24 Level-0 table #358: started
+2026/07/27-21:56:58.297 ce24 Level-0 table #358: 20600 bytes OK
+2026/07/27-21:56:58.300 ce24 Delete type=0 #355
+2026/07/27-22:02:56.152 ce24 Level-0 table #360: started
+2026/07/27-22:02:56.162 ce24 Level-0 table #360: 20728 bytes OK
+2026/07/27-22:02:56.166 ce24 Delete type=0 #357
+2026/07/27-22:02:56.166 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-22:02:56.179 ce24 Generated table #361@0: 229 keys, 335448 bytes
+2026/07/27-22:02:56.179 ce24 Compacted 4@0 + 1@1 files => 335448 bytes
+2026/07/27-22:02:56.182 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-22:02:56.183 ce24 Delete type=2 #352
+2026/07/27-22:02:56.183 ce24 Delete type=2 #354
+2026/07/27-22:02:56.183 ce24 Delete type=2 #356
+2026/07/27-22:02:56.183 ce24 Delete type=2 #358
+2026/07/27-22:02:56.183 ce24 Delete type=2 #360
+2026/07/27-22:03:09.397 ce24 Level-0 table #363: started
+2026/07/27-22:03:09.404 ce24 Level-0 table #363: 20174 bytes OK
+2026/07/27-22:03:09.407 ce24 Delete type=0 #359
+2026/07/27-22:03:15.854 c2a0 Level-0 table #365: started
+2026/07/27-22:03:15.862 c2a0 Level-0 table #365: 21356 bytes OK
+2026/07/27-22:03:15.865 c2a0 Delete type=0 #362
+2026/07/27-22:09:28.958 ce24 Level-0 table #367: started
+2026/07/27-22:09:28.964 ce24 Level-0 table #367: 22765 bytes OK
+2026/07/27-22:09:28.967 ce24 Delete type=0 #364
+2026/07/27-22:09:38.189 c2a0 Level-0 table #369: started
+2026/07/27-22:09:38.194 c2a0 Level-0 table #369: 20482 bytes OK
+2026/07/27-22:09:38.198 c2a0 Delete type=0 #366
+2026/07/27-22:09:38.199 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-22:09:38.210 ce24 Generated table #370@0: 233 keys, 335576 bytes
+2026/07/27-22:09:38.211 ce24 Compacted 4@0 + 1@1 files => 335576 bytes
+2026/07/27-22:09:38.213 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-22:09:38.214 ce24 Delete type=2 #361
+2026/07/27-22:09:38.214 ce24 Delete type=2 #363
+2026/07/27-22:09:38.214 ce24 Delete type=2 #365
+2026/07/27-22:09:38.214 ce24 Delete type=2 #367
+2026/07/27-22:09:38.214 ce24 Delete type=2 #369
+2026/07/27-22:09:58.289 ce24 Level-0 table #372: started
+2026/07/27-22:09:58.299 ce24 Level-0 table #372: 20639 bytes OK
+2026/07/27-22:09:58.302 ce24 Delete type=0 #368
+2026/07/27-22:15:54.550 ce24 Level-0 table #374: started
+2026/07/27-22:15:54.558 ce24 Level-0 table #374: 21346 bytes OK
+2026/07/27-22:15:54.561 ce24 Delete type=0 #371
+2026/07/27-22:15:59.740 ce24 Level-0 table #376: started
+2026/07/27-22:15:59.746 ce24 Level-0 table #376: 12910 bytes OK
+2026/07/27-22:15:59.749 ce24 Delete type=0 #373
+2026/07/27-22:21:30.542 ce24 Level-0 table #378: started
+2026/07/27-22:21:30.551 ce24 Level-0 table #378: 21118 bytes OK
+2026/07/27-22:21:30.553 ce24 Delete type=0 #375
+2026/07/27-22:21:30.554 c2a0 Compacting 4@0 + 1@1 files
+2026/07/27-22:21:30.560 c2a0 Generated table #379@0: 232 keys, 335491 bytes
+2026/07/27-22:21:30.560 c2a0 Compacted 4@0 + 1@1 files => 335491 bytes
+2026/07/27-22:21:30.561 c2a0 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-22:21:30.561 c2a0 Delete type=2 #370
+2026/07/27-22:21:30.562 c2a0 Delete type=2 #372
+2026/07/27-22:21:30.562 c2a0 Delete type=2 #374
+2026/07/27-22:21:30.562 c2a0 Delete type=2 #376
+2026/07/27-22:21:30.562 c2a0 Delete type=2 #378
+2026/07/27-22:21:58.292 ce24 Level-0 table #381: started
+2026/07/27-22:21:58.302 ce24 Level-0 table #381: 22375 bytes OK
+2026/07/27-22:21:58.304 ce24 Delete type=0 #377
+2026/07/27-22:27:15.236 ce24 Level-0 table #383: started
+2026/07/27-22:27:15.244 ce24 Level-0 table #383: 21359 bytes OK
+2026/07/27-22:27:15.247 ce24 Delete type=0 #380
+2026/07/27-22:27:23.359 ce24 Level-0 table #385: started
+2026/07/27-22:27:23.366 ce24 Level-0 table #385: 21320 bytes OK
+2026/07/27-22:27:23.370 ce24 Delete type=0 #382
+2026/07/27-22:33:14.086 c2a0 Level-0 table #387: started
+2026/07/27-22:33:14.093 c2a0 Level-0 table #387: 167057 bytes OK
+2026/07/27-22:33:14.097 c2a0 Delete type=0 #384
+2026/07/27-22:33:14.097 c2a0 Compacting 4@0 + 1@1 files
+2026/07/27-22:33:14.110 c2a0 Generated table #388@0: 233 keys, 335577 bytes
+2026/07/27-22:33:14.110 c2a0 Compacted 4@0 + 1@1 files => 335577 bytes
+2026/07/27-22:33:14.113 c2a0 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-22:33:14.114 c2a0 Delete type=2 #379
+2026/07/27-22:33:14.114 c2a0 Delete type=2 #381
+2026/07/27-22:33:14.114 c2a0 Delete type=2 #383
+2026/07/27-22:33:14.114 c2a0 Delete type=2 #385
+2026/07/27-22:33:14.114 c2a0 Delete type=2 #387
+2026/07/27-22:33:24.530 ce24 Level-0 table #390: started
+2026/07/27-22:33:24.538 ce24 Level-0 table #390: 20713 bytes OK
+2026/07/27-22:33:24.542 ce24 Delete type=0 #386
+2026/07/27-22:33:58.292 ce24 Level-0 table #392: started
+2026/07/27-22:33:58.302 ce24 Level-0 table #392: 22437 bytes OK
+2026/07/27-22:33:58.305 ce24 Delete type=0 #389
+2026/07/27-22:39:35.639 ce24 Level-0 table #394: started
+2026/07/27-22:39:35.645 ce24 Level-0 table #394: 13237 bytes OK
+2026/07/27-22:39:35.648 ce24 Delete type=0 #391
+2026/07/27-22:39:40.923 ce24 Level-0 table #396: started
+2026/07/27-22:39:40.930 ce24 Level-0 table #396: 21448 bytes OK
+2026/07/27-22:39:40.933 ce24 Delete type=0 #393
+2026/07/27-22:39:40.933 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-22:39:40.947 ce24 Generated table #397@0: 236 keys, 335620 bytes
+2026/07/27-22:39:40.947 ce24 Compacted 4@0 + 1@1 files => 335620 bytes
+2026/07/27-22:39:40.950 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-22:39:40.951 ce24 Delete type=2 #388
+2026/07/27-22:39:40.951 ce24 Delete type=2 #390
+2026/07/27-22:39:40.951 ce24 Delete type=2 #392
+2026/07/27-22:39:40.951 ce24 Delete type=2 #394
+2026/07/27-22:39:40.951 ce24 Delete type=2 #396
+2026/07/27-22:39:46.957 ce24 Level-0 table #399: started
+2026/07/27-22:39:46.965 ce24 Level-0 table #399: 21359 bytes OK
+2026/07/27-22:39:46.968 ce24 Delete type=0 #395
+2026/07/27-22:45:01.382 ce24 Level-0 table #401: started
+2026/07/27-22:45:01.387 ce24 Level-0 table #401: 20697 bytes OK
+2026/07/27-22:45:01.390 ce24 Delete type=0 #398
+2026/07/27-22:45:07.352 ce24 Level-0 table #403: started
+2026/07/27-22:45:07.356 ce24 Level-0 table #403: 21179 bytes OK
+2026/07/27-22:45:07.359 ce24 Delete type=0 #400
+2026/07/27-22:45:10.841 ce24 Level-0 table #405: started
+2026/07/27-22:45:10.845 ce24 Level-0 table #405: 12990 bytes OK
+2026/07/27-22:45:10.848 ce24 Delete type=0 #402
+2026/07/27-22:45:10.848 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-22:45:10.856 ce24 Generated table #406@0: 239 keys, 335802 bytes
+2026/07/27-22:45:10.856 ce24 Compacted 4@0 + 1@1 files => 335802 bytes
+2026/07/27-22:45:10.858 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-22:45:10.859 ce24 Delete type=2 #397
+2026/07/27-22:45:10.859 ce24 Delete type=2 #399
+2026/07/27-22:45:10.859 ce24 Delete type=2 #401
+2026/07/27-22:45:10.859 ce24 Delete type=2 #403
+2026/07/27-22:45:10.859 ce24 Delete type=2 #405
+2026/07/27-22:50:26.158 ce24 Level-0 table #408: started
+2026/07/27-22:50:26.163 ce24 Level-0 table #408: 20885 bytes OK
+2026/07/27-22:50:26.166 ce24 Delete type=0 #404
+2026/07/27-22:50:58.296 ce24 Level-0 table #410: started
+2026/07/27-22:50:58.305 ce24 Level-0 table #410: 22406 bytes OK
+2026/07/27-22:50:58.309 ce24 Delete type=0 #407
+2026/07/27-22:56:58.295 ce24 Level-0 table #412: started
+2026/07/27-22:56:58.305 ce24 Level-0 table #412: 21290 bytes OK
+2026/07/27-22:56:58.311 ce24 Delete type=0 #409
+2026/07/27-22:57:11.955 ce24 Level-0 table #414: started
+2026/07/27-22:57:11.962 ce24 Level-0 table #414: 20650 bytes OK
+2026/07/27-22:57:11.965 ce24 Delete type=0 #411
+2026/07/27-22:57:11.967 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-22:57:11.980 ce24 Generated table #415@0: 240 keys, 336059 bytes
+2026/07/27-22:57:11.981 ce24 Compacted 4@0 + 1@1 files => 336059 bytes
+2026/07/27-22:57:11.982 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-22:57:11.983 ce24 Delete type=2 #406
+2026/07/27-22:57:11.984 ce24 Delete type=2 #408
+2026/07/27-22:57:11.984 ce24 Delete type=2 #410
+2026/07/27-22:57:11.984 ce24 Delete type=2 #412
+2026/07/27-22:57:11.984 ce24 Delete type=2 #414
+2026/07/27-23:01:45.986 ce24 Level-0 table #417: started
+2026/07/27-23:01:45.998 ce24 Level-0 table #417: 21897 bytes OK
+2026/07/27-23:01:46.001 ce24 Delete type=0 #413
+2026/07/27-23:01:58.283 ce24 Level-0 table #419: started
+2026/07/27-23:01:58.289 ce24 Level-0 table #419: 20640 bytes OK
+2026/07/27-23:01:58.292 ce24 Delete type=0 #416
+2026/07/27-23:02:58.288 ce24 Level-0 table #421: started
+2026/07/27-23:02:58.299 ce24 Level-0 table #421: 20746 bytes OK
+2026/07/27-23:02:58.302 ce24 Delete type=0 #418
+2026/07/27-23:06:34.874 ce24 Level-0 table #423: started
+2026/07/27-23:06:34.883 ce24 Level-0 table #423: 20388 bytes OK
+2026/07/27-23:06:34.884 ce24 Delete type=0 #420
+2026/07/27-23:06:34.885 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-23:06:34.891 ce24 Generated table #424@0: 241 keys, 336030 bytes
+2026/07/27-23:06:34.891 ce24 Compacted 4@0 + 1@1 files => 336030 bytes
+2026/07/27-23:06:34.892 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-23:06:34.892 ce24 Delete type=2 #415
+2026/07/27-23:06:34.892 ce24 Delete type=2 #417
+2026/07/27-23:06:34.892 ce24 Delete type=2 #419
+2026/07/27-23:06:34.892 ce24 Delete type=2 #421
+2026/07/27-23:06:34.893 ce24 Delete type=2 #423
+2026/07/27-23:06:58.284 c2a0 Level-0 table #426: started
+2026/07/27-23:06:58.288 c2a0 Level-0 table #426: 21667 bytes OK
+2026/07/27-23:06:58.291 c2a0 Delete type=0 #422
+2026/07/27-23:11:13.688 ce24 Level-0 table #428: started
+2026/07/27-23:11:13.696 ce24 Level-0 table #428: 21786 bytes OK
+2026/07/27-23:11:13.700 ce24 Delete type=0 #425
+2026/07/27-23:11:25.795 ce24 Level-0 table #430: started
+2026/07/27-23:11:25.805 ce24 Level-0 table #430: 20621 bytes OK
+2026/07/27-23:11:25.808 ce24 Delete type=0 #427
+2026/07/27-23:17:34.443 ce24 Level-0 table #432: started
+2026/07/27-23:17:34.451 ce24 Level-0 table #432: 22514 bytes OK
+2026/07/27-23:17:34.455 ce24 Delete type=0 #429
+2026/07/27-23:17:34.456 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-23:17:34.465 ce24 Generated table #433@0: 244 keys, 336143 bytes
+2026/07/27-23:17:34.465 ce24 Compacted 4@0 + 1@1 files => 336143 bytes
+2026/07/27-23:17:34.468 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-23:17:34.468 ce24 Delete type=2 #424
+2026/07/27-23:17:34.468 ce24 Delete type=2 #426
+2026/07/27-23:17:34.468 ce24 Delete type=2 #428
+2026/07/27-23:17:34.468 ce24 Delete type=2 #430
+2026/07/27-23:17:34.468 ce24 Delete type=2 #432
+2026/07/27-23:17:40.057 ce24 Level-0 table #435: started
+2026/07/27-23:17:40.062 ce24 Level-0 table #435: 21037 bytes OK
+2026/07/27-23:17:40.065 ce24 Delete type=0 #431
+2026/07/27-23:17:58.295 ce24 Level-0 table #437: started
+2026/07/27-23:17:58.304 ce24 Level-0 table #437: 22271 bytes OK
+2026/07/27-23:17:58.307 ce24 Delete type=0 #434
+2026/07/27-23:23:49.060 ce24 Level-0 table #439: started
+2026/07/27-23:23:49.068 ce24 Level-0 table #439: 21497 bytes OK
+2026/07/27-23:23:49.071 ce24 Delete type=0 #436
+2026/07/27-23:24:01.632 ce24 Level-0 table #441: started
+2026/07/27-23:24:01.648 ce24 Level-0 table #441: 21683 bytes OK
+2026/07/27-23:24:01.651 ce24 Delete type=0 #438
+2026/07/27-23:24:01.652 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-23:24:01.666 ce24 Generated table #442@0: 245 keys, 336167 bytes
+2026/07/27-23:24:01.666 ce24 Compacted 4@0 + 1@1 files => 336167 bytes
+2026/07/27-23:24:01.668 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-23:24:01.669 ce24 Delete type=2 #433
+2026/07/27-23:24:01.669 ce24 Delete type=2 #435
+2026/07/27-23:24:01.669 ce24 Delete type=2 #437
+2026/07/27-23:24:01.669 ce24 Delete type=2 #439
+2026/07/27-23:24:01.669 ce24 Delete type=2 #441
+2026/07/27-23:28:59.298 ce24 Level-0 table #444: started
+2026/07/27-23:28:59.305 ce24 Level-0 table #444: 21572 bytes OK
+2026/07/27-23:28:59.309 ce24 Delete type=0 #440
+2026/07/27-23:29:14.853 ce24 Level-0 table #446: started
+2026/07/27-23:29:14.860 ce24 Level-0 table #446: 21235 bytes OK
+2026/07/27-23:29:14.865 ce24 Delete type=0 #443
+2026/07/27-23:29:19.927 b2d4 Level-0 table #448: started
+2026/07/27-23:29:19.934 b2d4 Level-0 table #448: 20645 bytes OK
+2026/07/27-23:29:19.938 b2d4 Delete type=0 #445
+2026/07/27-23:34:42.186 ce24 Level-0 table #450: started
+2026/07/27-23:34:42.196 ce24 Level-0 table #450: 167389 bytes OK
+2026/07/27-23:34:42.199 ce24 Delete type=0 #447
+2026/07/27-23:34:42.200 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-23:34:42.209 ce24 Generated table #451@0: 244 keys, 336098 bytes
+2026/07/27-23:34:42.209 ce24 Compacted 4@0 + 1@1 files => 336098 bytes
+2026/07/27-23:34:42.210 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-23:34:42.210 ce24 Delete type=2 #442
+2026/07/27-23:34:42.210 ce24 Delete type=2 #444
+2026/07/27-23:34:42.210 ce24 Delete type=2 #446
+2026/07/27-23:34:42.210 ce24 Delete type=2 #448
+2026/07/27-23:34:42.210 ce24 Delete type=2 #450
+2026/07/27-23:34:58.349 ce24 Level-0 table #453: started
+2026/07/27-23:34:58.357 ce24 Level-0 table #453: 21688 bytes OK
+2026/07/27-23:34:58.360 ce24 Delete type=0 #449
+2026/07/27-23:40:49.734 ce24 Level-0 table #455: started
+2026/07/27-23:40:49.740 ce24 Level-0 table #455: 21351 bytes OK
+2026/07/27-23:40:49.744 ce24 Delete type=0 #452
+2026/07/27-23:40:58.372 ce24 Level-0 table #457: started
+2026/07/27-23:40:58.378 ce24 Level-0 table #457: 20596 bytes OK
+2026/07/27-23:40:58.382 ce24 Delete type=0 #454
+2026/07/27-23:46:30.429 ce24 Level-0 table #459: started
+2026/07/27-23:46:30.432 ce24 Level-0 table #459: 21187 bytes OK
+2026/07/27-23:46:30.436 ce24 Delete type=0 #456
+2026/07/27-23:46:30.437 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-23:46:30.449 ce24 Generated table #460@0: 244 keys, 336116 bytes
+2026/07/27-23:46:30.450 ce24 Compacted 4@0 + 1@1 files => 336116 bytes
+2026/07/27-23:46:30.451 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-23:46:30.451 ce24 Delete type=2 #451
+2026/07/27-23:46:30.451 ce24 Delete type=2 #453
+2026/07/27-23:46:30.451 ce24 Delete type=2 #455
+2026/07/27-23:46:30.451 ce24 Delete type=2 #457
+2026/07/27-23:46:30.451 ce24 Delete type=2 #459
+2026/07/27-23:46:58.370 c2a0 Level-0 table #462: started
+2026/07/27-23:46:58.380 c2a0 Level-0 table #462: 22452 bytes OK
+2026/07/27-23:46:58.383 c2a0 Delete type=0 #458
+2026/07/27-23:51:28.274 ce24 Level-0 table #464: started
+2026/07/27-23:51:28.279 ce24 Level-0 table #464: 20466 bytes OK
+2026/07/27-23:51:28.285 ce24 Delete type=0 #461
+2026/07/27-23:51:58.388 c2a0 Level-0 table #466: started
+2026/07/27-23:51:58.397 c2a0 Level-0 table #466: 21484 bytes OK
+2026/07/27-23:51:58.400 c2a0 Delete type=0 #463
+2026/07/27-23:56:16.746 ce24 Level-0 table #468: started
+2026/07/27-23:56:16.750 ce24 Level-0 table #468: 20468 bytes OK
+2026/07/27-23:56:16.753 ce24 Delete type=0 #465
+2026/07/27-23:56:16.754 ce24 Compacting 4@0 + 1@1 files
+2026/07/27-23:56:16.762 ce24 Generated table #469@0: 245 keys, 336114 bytes
+2026/07/27-23:56:16.762 ce24 Compacted 4@0 + 1@1 files => 336114 bytes
+2026/07/27-23:56:16.767 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/27-23:56:16.768 ce24 Delete type=2 #460
+2026/07/27-23:56:16.768 ce24 Delete type=2 #462
+2026/07/27-23:56:16.768 ce24 Delete type=2 #464
+2026/07/27-23:56:16.768 ce24 Delete type=2 #466
+2026/07/27-23:56:16.768 ce24 Delete type=2 #468
+2026/07/27-23:56:24.404 ce24 Level-0 table #471: started
+2026/07/27-23:56:24.420 ce24 Level-0 table #471: 21356 bytes OK
+2026/07/27-23:56:24.423 ce24 Delete type=0 #467
+2026/07/28-00:02:35.796 ce24 Level-0 table #473: started
+2026/07/28-00:02:35.804 ce24 Level-0 table #473: 20698 bytes OK
+2026/07/28-00:02:35.808 ce24 Delete type=0 #470
+2026/07/28-00:02:42.418 c2a0 Level-0 table #475: started
+2026/07/28-00:02:42.430 c2a0 Level-0 table #475: 21477 bytes OK
+2026/07/28-00:02:42.434 c2a0 Delete type=0 #472
+2026/07/28-00:08:02.560 ce24 Level-0 table #477: started
+2026/07/28-00:08:02.566 ce24 Level-0 table #477: 21701 bytes OK
+2026/07/28-00:08:02.568 ce24 Delete type=0 #474
+2026/07/28-00:08:02.569 ce24 Compacting 4@0 + 1@1 files
+2026/07/28-00:08:02.581 ce24 Generated table #478@0: 250 keys, 336498 bytes
+2026/07/28-00:08:02.582 ce24 Compacted 4@0 + 1@1 files => 336498 bytes
+2026/07/28-00:08:02.583 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/28-00:08:02.584 ce24 Delete type=2 #469
+2026/07/28-00:08:02.584 ce24 Delete type=2 #471
+2026/07/28-00:08:02.584 ce24 Delete type=2 #473
+2026/07/28-00:08:02.584 ce24 Delete type=2 #475
+2026/07/28-00:08:02.584 ce24 Delete type=2 #477
+2026/07/28-00:08:09.752 ce24 Level-0 table #480: started
+2026/07/28-00:08:09.760 ce24 Level-0 table #480: 21715 bytes OK
+2026/07/28-00:08:09.763 ce24 Delete type=0 #476
+2026/07/28-00:12:46.722 ce24 Level-0 table #482: started
+2026/07/28-00:12:46.730 ce24 Level-0 table #482: 23126 bytes OK
+2026/07/28-00:12:46.733 ce24 Delete type=0 #479
+2026/07/28-00:12:55.654 c2a0 Level-0 table #484: started
+2026/07/28-00:12:55.660 c2a0 Level-0 table #484: 22147 bytes OK
+2026/07/28-00:12:55.663 c2a0 Delete type=0 #481
+2026/07/28-00:19:18.343 ce24 Level-0 table #486: started
+2026/07/28-00:19:18.348 ce24 Level-0 table #486: 23124 bytes OK
+2026/07/28-00:19:18.351 ce24 Delete type=0 #483
+2026/07/28-00:19:18.351 ce24 Compacting 4@0 + 1@1 files
+2026/07/28-00:19:18.363 ce24 Generated table #487@0: 250 keys, 336428 bytes
+2026/07/28-00:19:18.363 ce24 Compacted 4@0 + 1@1 files => 336428 bytes
+2026/07/28-00:19:18.365 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/28-00:19:18.366 ce24 Delete type=2 #478
+2026/07/28-00:19:18.366 ce24 Delete type=2 #480
+2026/07/28-00:19:18.366 ce24 Delete type=2 #482
+2026/07/28-00:19:18.366 ce24 Delete type=2 #484
+2026/07/28-00:19:18.366 ce24 Delete type=2 #486
+2026/07/28-00:24:23.384 ce24 Level-0 table #489: started
+2026/07/28-00:24:23.390 ce24 Level-0 table #489: 22067 bytes OK
+2026/07/28-00:24:23.396 ce24 Delete type=0 #485
+2026/07/28-00:24:38.738 ce24 Level-0 table #491: started
+2026/07/28-00:24:38.746 ce24 Level-0 table #491: 21527 bytes OK
+2026/07/28-00:24:38.749 ce24 Delete type=0 #488
+2026/07/28-00:24:58.436 ce24 Level-0 table #493: started
+2026/07/28-00:24:58.443 ce24 Level-0 table #493: 20858 bytes OK
+2026/07/28-00:24:58.446 ce24 Delete type=0 #490
+2026/07/28-00:29:41.074 ce24 Level-0 table #495: started
+2026/07/28-00:29:41.083 ce24 Level-0 table #495: 21594 bytes OK
+2026/07/28-00:29:41.087 ce24 Delete type=0 #492
+2026/07/28-00:29:41.087 ce24 Compacting 4@0 + 1@1 files
+2026/07/28-00:29:41.099 ce24 Generated table #496@0: 261 keys, 337693 bytes
+2026/07/28-00:29:41.099 ce24 Compacted 4@0 + 1@1 files => 337693 bytes
+2026/07/28-00:29:41.102 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/28-00:29:41.103 ce24 Delete type=2 #487
+2026/07/28-00:29:41.103 ce24 Delete type=2 #489
+2026/07/28-00:29:41.103 ce24 Delete type=2 #491
+2026/07/28-00:29:41.103 ce24 Delete type=2 #493
+2026/07/28-00:29:41.103 ce24 Delete type=2 #495
+2026/07/28-00:29:48.269 c2a0 Level-0 table #498: started
+2026/07/28-00:29:48.280 c2a0 Level-0 table #498: 21347 bytes OK
+2026/07/28-00:29:48.282 c2a0 Delete type=0 #494
+2026/07/28-00:34:30.389 ce24 Level-0 table #500: started
+2026/07/28-00:34:30.398 ce24 Level-0 table #500: 20851 bytes OK
+2026/07/28-00:34:30.401 ce24 Delete type=0 #497
+2026/07/28-00:34:38.739 ce24 Level-0 table #502: started
+2026/07/28-00:34:38.753 ce24 Level-0 table #502: 176161 bytes OK
+2026/07/28-00:34:38.755 ce24 Delete type=0 #499
+2026/07/28-00:39:53.071 c2a0 Level-0 table #504: started
+2026/07/28-00:39:53.078 c2a0 Level-0 table #504: 20747 bytes OK
+2026/07/28-00:39:53.081 c2a0 Delete type=0 #501
+2026/07/28-00:39:53.082 c2a0 Compacting 4@0 + 1@1 files
+2026/07/28-00:39:53.090 c2a0 Generated table #505@0: 262 keys, 337659 bytes
+2026/07/28-00:39:53.090 c2a0 Compacted 4@0 + 1@1 files => 337659 bytes
+2026/07/28-00:39:53.093 c2a0 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/28-00:39:53.093 c2a0 Delete type=2 #496
+2026/07/28-00:39:53.093 c2a0 Delete type=2 #498
+2026/07/28-00:39:53.094 c2a0 Delete type=2 #500
+2026/07/28-00:39:53.094 c2a0 Delete type=2 #502
+2026/07/28-00:39:53.094 c2a0 Delete type=2 #504
+2026/07/28-00:39:58.194 ce24 Level-0 table #507: started
+2026/07/28-00:39:58.202 ce24 Level-0 table #507: 22202 bytes OK
+2026/07/28-00:39:58.205 ce24 Delete type=0 #503
+2026/07/28-00:44:50.581 ce24 Level-0 table #509: started
+2026/07/28-00:44:50.589 ce24 Level-0 table #509: 22745 bytes OK
+2026/07/28-00:44:50.592 ce24 Delete type=0 #506
+2026/07/28-00:44:54.745 ce24 Level-0 table #511: started
+2026/07/28-00:44:54.754 ce24 Level-0 table #511: 21498 bytes OK
+2026/07/28-00:44:54.757 ce24 Delete type=0 #508
+2026/07/28-00:44:58.453 ce24 Level-0 table #513: started
+2026/07/28-00:44:58.459 ce24 Level-0 table #513: 12921 bytes OK
+2026/07/28-00:44:58.462 ce24 Delete type=0 #510
+2026/07/28-00:44:58.463 ce24 Compacting 4@0 + 1@1 files
+2026/07/28-00:44:58.476 ce24 Generated table #514@0: 267 keys, 337987 bytes
+2026/07/28-00:44:58.476 ce24 Compacted 4@0 + 1@1 files => 337987 bytes
+2026/07/28-00:44:58.478 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/28-00:44:58.479 ce24 Delete type=2 #505
+2026/07/28-00:44:58.479 ce24 Delete type=2 #507
+2026/07/28-00:44:58.479 ce24 Delete type=2 #509
+2026/07/28-00:44:58.479 ce24 Delete type=2 #511
+2026/07/28-00:44:58.479 ce24 Delete type=2 #513
+2026/07/28-00:50:53.017 ce24 Level-0 table #516: started
+2026/07/28-00:50:53.025 ce24 Level-0 table #516: 23099 bytes OK
+2026/07/28-00:50:53.028 ce24 Delete type=0 #512
+2026/07/28-00:51:10.696 ce24 Level-0 table #518: started
+2026/07/28-00:51:10.713 ce24 Level-0 table #518: 22614 bytes OK
+2026/07/28-00:51:10.714 ce24 Delete type=0 #515
+2026/07/28-00:56:30.267 ce24 Level-0 table #520: started
+2026/07/28-00:56:30.272 ce24 Level-0 table #520: 21736 bytes OK
+2026/07/28-00:56:30.276 ce24 Delete type=0 #517
+2026/07/28-01:02:00.547 ce24 Level-0 table #522: started
+2026/07/28-01:02:00.555 ce24 Level-0 table #522: 21720 bytes OK
+2026/07/28-01:02:00.558 ce24 Delete type=0 #519
+2026/07/28-01:02:00.558 ce24 Compacting 4@0 + 1@1 files
+2026/07/28-01:02:00.568 ce24 Generated table #523@0: 272 keys, 338340 bytes
+2026/07/28-01:02:00.568 ce24 Compacted 4@0 + 1@1 files => 338340 bytes
+2026/07/28-01:02:00.570 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/28-01:02:00.571 ce24 Delete type=2 #514
+2026/07/28-01:02:00.571 ce24 Delete type=2 #516
+2026/07/28-01:02:00.571 ce24 Delete type=2 #518
+2026/07/28-01:02:00.571 ce24 Delete type=2 #520
+2026/07/28-01:02:00.571 ce24 Delete type=2 #522
+2026/07/28-01:02:07.541 ce24 Level-0 table #525: started
+2026/07/28-01:02:07.550 ce24 Level-0 table #525: 20380 bytes OK
+2026/07/28-01:02:07.553 ce24 Delete type=0 #521
+2026/07/28-01:02:20.797 c2a0 Level-0 table #527: started
+2026/07/28-01:02:20.811 c2a0 Level-0 table #527: 21426 bytes OK
+2026/07/28-01:02:20.813 c2a0 Delete type=0 #524
+2026/07/28-01:08:09.051 c2a0 Level-0 table #529: started
+2026/07/28-01:08:09.055 c2a0 Level-0 table #529: 20658 bytes OK
+2026/07/28-01:08:09.059 c2a0 Delete type=0 #526
+2026/07/28-01:08:15.912 ce24 Level-0 table #531: started
+2026/07/28-01:08:15.917 ce24 Level-0 table #531: 22256 bytes OK
+2026/07/28-01:08:15.921 ce24 Delete type=0 #528
+2026/07/28-01:08:15.921 ce24 Compacting 4@0 + 1@1 files
+2026/07/28-01:08:15.931 ce24 Generated table #532@0: 276 keys, 337994 bytes
+2026/07/28-01:08:15.932 ce24 Compacted 4@0 + 1@1 files => 337994 bytes
+2026/07/28-01:08:15.934 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/28-01:08:15.935 ce24 Delete type=2 #523
+2026/07/28-01:08:15.935 ce24 Delete type=2 #525
+2026/07/28-01:08:15.935 ce24 Delete type=2 #527
+2026/07/28-01:08:15.935 ce24 Delete type=2 #529
+2026/07/28-01:08:15.935 ce24 Delete type=2 #531
+2026/07/28-01:08:20.618 ce24 Level-0 table #534: started
+2026/07/28-01:08:20.636 ce24 Level-0 table #534: 21816 bytes OK
+2026/07/28-01:08:20.639 ce24 Delete type=0 #530
+2026/07/28-01:13:14.476 c2a0 Level-0 table #536: started
+2026/07/28-01:13:14.490 c2a0 Level-0 table #536: 21954 bytes OK
+2026/07/28-01:13:14.494 c2a0 Delete type=0 #533
+2026/07/28-01:19:30.015 ce24 Level-0 table #538: started
+2026/07/28-01:19:30.020 ce24 Level-0 table #538: 22578 bytes OK
+2026/07/28-01:19:30.022 ce24 Delete type=0 #535
+2026/07/28-01:19:37.489 ce24 Level-0 table #540: started
+2026/07/28-01:19:37.494 ce24 Level-0 table #540: 21604 bytes OK
+2026/07/28-01:19:37.495 ce24 Delete type=0 #537
+2026/07/28-01:19:37.496 c2a0 Compacting 4@0 + 1@1 files
+2026/07/28-01:19:37.504 c2a0 Generated table #541@0: 278 keys, 338061 bytes
+2026/07/28-01:19:37.504 c2a0 Compacted 4@0 + 1@1 files => 338061 bytes
+2026/07/28-01:19:37.508 c2a0 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/28-01:19:37.509 c2a0 Delete type=2 #532
+2026/07/28-01:19:37.509 c2a0 Delete type=2 #534
+2026/07/28-01:19:37.509 c2a0 Delete type=2 #536
+2026/07/28-01:19:37.509 c2a0 Delete type=2 #538
+2026/07/28-01:19:37.509 c2a0 Delete type=2 #540
+2026/07/28-01:19:43.612 c2a0 Level-0 table #543: started
+2026/07/28-01:19:43.628 c2a0 Level-0 table #543: 22380 bytes OK
+2026/07/28-01:19:43.631 c2a0 Delete type=0 #539
+2026/07/28-01:24:32.025 ce24 Level-0 table #545: started
+2026/07/28-01:24:32.029 ce24 Level-0 table #545: 22817 bytes OK
+2026/07/28-01:24:32.034 ce24 Delete type=0 #542
+2026/07/28-01:24:46.591 ce24 Level-0 table #547: started
+2026/07/28-01:24:46.614 ce24 Level-0 table #547: 21707 bytes OK
+2026/07/28-01:24:46.618 ce24 Delete type=0 #544
+2026/07/28-01:29:42.073 ce24 Level-0 table #549: started
+2026/07/28-01:29:42.078 ce24 Level-0 table #549: 21660 bytes OK
+2026/07/28-01:29:42.082 ce24 Delete type=0 #546
+2026/07/28-01:29:42.082 ce24 Compacting 4@0 + 1@1 files
+2026/07/28-01:29:42.093 ce24 Generated table #550@0: 278 keys, 338036 bytes
+2026/07/28-01:29:42.093 ce24 Compacted 4@0 + 1@1 files => 338036 bytes
+2026/07/28-01:29:42.095 ce24 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/07/28-01:29:42.095 ce24 Delete type=2 #541
+2026/07/28-01:29:42.095 ce24 Delete type=2 #543
+2026/07/28-01:29:42.095 ce24 Delete type=2 #545
+2026/07/28-01:29:42.095 ce24 Delete type=2 #547
+2026/07/28-01:29:42.095 ce24 Delete type=2 #549
+2026/07/28-01:29:55.772 ce24 Level-0 table #552: started
+2026/07/28-01:29:55.788 ce24 Level-0 table #552: 22081 bytes OK
+2026/07/28-01:29:55.792 ce24 Delete type=0 #548

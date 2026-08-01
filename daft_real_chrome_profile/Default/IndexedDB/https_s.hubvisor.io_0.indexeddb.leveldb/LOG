@@ -1,0 +1,7 @@
+2026/07/27-23:56:10.485 a928 Reusing MANIFEST c:\Users\sekre\Downloads\OneDrive - South East Technological University\Рабочий стол\hata\daft_real_chrome_profile\Default\IndexedDB\https_s.hubvisor.io_0.indexeddb.leveldb/MANIFEST-000001
+2026/07/27-23:56:10.485 a928 Recovering log #3
+2026/07/27-23:56:10.485 a928 Reusing old log c:\Users\sekre\Downloads\OneDrive - South East Technological University\Рабочий стол\hata\daft_real_chrome_profile\Default\IndexedDB\https_s.hubvisor.io_0.indexeddb.leveldb/000003.log 
+2026/07/27-23:56:13.082 a928 Level-0 table #5: started
+2026/07/27-23:56:13.087 a928 Level-0 table #5: 377 bytes OK
+2026/07/27-23:56:13.093 a928 Delete type=0 #3
+2026/07/27-23:56:13.093 a928 Manual compaction at level-0 from (begin) .. (end); will stop at (end)

@@ -1,0 +1,6 @@
+2026/07/27-18:25:35.144 4530 Creating DB c:\Users\sekre\Downloads\OneDrive - South East Technological University\Рабочий стол\hata\daft_real_chrome_profile\Default\IndexedDB\https_bbbf4d292dbb0e35697c782e743669c3.safeframe.googlesyndication.com_0.indexeddb.leveldb since it was missing.
+2026/07/27-18:25:35.156 4530 Reusing MANIFEST c:\Users\sekre\Downloads\OneDrive - South East Technological University\Рабочий стол\hata\daft_real_chrome_profile\Default\IndexedDB\https_bbbf4d292dbb0e35697c782e743669c3.safeframe.googlesyndication.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/07/27-18:25:35.199 20dc Level-0 table #5: started
+2026/07/27-18:25:35.206 20dc Level-0 table #5: 1482 bytes OK
+2026/07/27-18:25:35.211 20dc Delete type=0 #3
+2026/07/27-18:25:35.211 81a4 Manual compaction at level-0 from '\x00\x01\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x02\x00\x00\x00' @ 0 : 0; will stop at (end)
