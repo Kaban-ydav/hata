@@ -747,43 +747,44 @@ async def parse_rent(page, seen_urls):
     except Exception as e:
         print(f"[!] Ошибка Rent.ie: {e}")
 
+# ==========================================
+# 2. ГЛАВНЫЙ ЦИКЛ ПАРСИНГА
+# ==========================================
 async def sites_parser_loop():
     print("🚀 Фоновый парсер сайтов (Daft + Rent) запущен!")
     seen_urls = load_seen_urls()
 
     while True:
         try:
+            # 1. Парсим Daft (быстро, легко, без браузера через curl_cffi)
+            await parse_daft(seen_urls)
+
+            # 2. Парсим Rent (используем обычный легкий launch без лок-файлов)
             async with async_playwright() as p:
                 is_linux = sys.platform.startswith("linux")
-                launch_options = {
-                    "user_data_dir": PROFILE_DIR,
-                    "headless": True if is_linux else False,
-                    "args": [
+                
+                browser = await p.chromium.launch(
+                    headless=True if is_linux else False,
+                    proxy={"server": PROXY_URL},
+                    args=[
                         "--disable-blink-features=AutomationControlled",
                         "--no-sandbox",
                         "--disable-dev-shm-usage",
                         "--disable-infobars"
-                    ],
-                    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-                    "viewport": {"width": 1280, "height": 720},
-                    "locale": "en-IE",
-                    "timezone_id": "Europe/Dublin"
-                }
-
-                if not is_linux and os.path.exists(CHROME_PATH):
-                    launch_options["executable_path"] = CHROME_PATH
-
-                context = await p.chromium.launch_persistent_context(**launch_options)
-                page = context.pages[0] if context.pages else await context.new_page()
-
-                # Сначала наносим визит на Daft.ie, чтобы сформировать нормальный сессионный контекст
-               
-
-                # Теперь шлем API-запросы через наш замаскированный Chromium
-                await parse_daft(page, seen_urls)
+                    ]
+                )
+                
+                context = await browser.new_context(
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                    viewport={"width": 1280, "height": 720},
+                    locale="en-IE",
+                    timezone_id="Europe/Dublin"
+                )
+                
+                page = await context.new_page()
                 await parse_rent(page, seen_urls)
                 
-                await context.close()
+                await browser.close()
 
             sleep_time = random.randint(240, 360) 
             print(f"\n[*] Все сайты проверены. Спим {sleep_time // 60} минут...")
@@ -793,7 +794,6 @@ async def sites_parser_loop():
         except Exception as e:
             print(f"[⚠️] Ошибка парсера сайтов ({e}). Перезапуск через 10 секунд...")
             await asyncio.sleep(10)
-
 # ==========================================
 # 🚀 ЗАПУСК СИСТЕМЫ
 # ==========================================
