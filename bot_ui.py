@@ -18,7 +18,7 @@ from curl_cffi import requests
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 
 # 🔑 ВСТАВЬ СЮДА СВОЙ КЛЮЧ ИЗ ЛИЧНОГО КАБИНЕТА SCRAPERAPI
-SCRAPER_API_KEY = "Тe9cac5ae6035bca21364a264bb9fc28a"
+SCRAPER_API_KEY = "e9cac5ae6035bca21364a264bb9fc28a"
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(CURRENT_DIR, "seen_daft_urls.txt")
