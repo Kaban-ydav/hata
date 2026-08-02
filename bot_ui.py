@@ -417,6 +417,9 @@ async def show_filters(message: types.Message):
 # ==========================================
 # 🕵️‍♂️ ПАРСЕРЫ (БЫСТРЫЕ ЧЕРЕЗ SCRAPERAPI)
 # ==========================================
+# ==========================================
+# 🕵️‍♂️ ПАРСЕРЫ (ОПТИМИЗИРОВАННЫЙ РАСХОД)
+# ==========================================
 async def parse_daft(seen_urls):
     configs = [
         {"name": "Wexford (Комнаты)", "url": "https://www.daft.ie/sharing/wexford?sort=publishDateDesc", "is_whole": False},
@@ -451,12 +454,9 @@ async def parse_daft(seen_urls):
 
             data = json.loads(script_tag.string)
             page_props = data.get('props', {}).get('pageProps', {})
-            
-            # Универсальный поиск списка объявлений в Next.js JSON
             listings = page_props.get('listings') or page_props.get('searchResult', {}).get('listings') or []
 
             if not listings:
-                print(f"[-] Объявления в JSON для {config['name']} не найдены.")
                 continue
 
             print(f"[+] Из HTML вытащено {len(listings)} объявлений для {config['name']}!")
@@ -486,6 +486,51 @@ async def parse_daft(seen_urls):
             await asyncio.sleep(2)
         except Exception as e:
             print(f"[!] Ошибка парсинга Daft: {e}")
+
+async def parse_rent(seen_urls):
+    print("[*] Проверяем Rent.ie (НАПРЯМУЮ, 0 КРЕДИТОВ)...")
+    try:
+        # Rent.ie прекрасно отдается напрямую с Azure без платных прокси!
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        }
+        
+        def fetch_rent():
+            return requests.get("https://www.rent.ie/rooms-to-rent/ireland/", headers=headers, impersonate="chrome124", timeout=30)
+
+        res = await asyncio.to_thread(fetch_rent)
+        if res.status_code != 200:
+            print(f"[!] Rent.ie ответил кодом {res.status_code}")
+            return
+            
+        soup = BeautifulSoup(res.text, "html.parser")
+        cards = soup.find_all("div", class_=lambda c: c and "search-result" in c)
+        
+        if not cards: 
+            return print("[-] На Rent.ie пока нет карточек.")
+            
+        print(f"[+] Найдено на Rent.ie: {len(cards)}")
+
+        for card in cards:
+            a_tag = card.find("a", href=True)
+            if not a_tag or "/rooms-to-rent/" not in a_tag["href"]: continue
+            url = ("https://www.rent.ie" + a_tag["href"]) if not a_tag["href"].startswith("http") else a_tag["href"]
+            
+            p_match = re.search(r'€\s*(\d+)', card.get_text())
+            if not p_match: continue
+            raw_p = int(p_match.group(1))
+            is_w = any(w in card.get_text().lower() for w in ["week", "pw", "w/k"])
+            m_price = int(raw_p * 4.33) if is_w else raw_p
+            d_price = f"€{raw_p}/нед (~€{m_price}/мес)" if is_w else f"€{raw_p}/мес"
+            address = a_tag.get_text(strip=True) or "Ireland"
+
+            save_listing_to_db("Rent.ie", address, m_price, d_price, url, False, "Комната")
+            if url not in seen_urls:
+                await broadcast_message(f"🚨 *Новое на Rent.ie!*\n🏠 {address}\n💰 {d_price}\n🔗 [ОТКРЫТЬ]({url})", m_price, address, False)
+                save_new_url(url)
+                seen_urls.add(url)
+    except Exception as e:
+        print(f"[!] Ошибка Rent.ie: {e}")
 
 async def parse_rent(seen_urls):
     print("[*] Проверяем Rent.ie (ScraperAPI)...")
