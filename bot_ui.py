@@ -435,7 +435,7 @@ async def parse_daft(seen_urls):
                     'api_key': SCRAPER_API_KEY,
                     'url': config["url"],
                     'render': 'false',
-                    'premium': 'true'
+                    
                 }
                 return requests.get('https://api.scraperapi.com/', params=params, timeout=60)
 
