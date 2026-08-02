@@ -434,8 +434,7 @@ async def parse_daft(seen_urls):
                 params = {
                     'api_key': SCRAPER_API_KEY,
                     'url': config["url"],
-                    'render': 'false',
-                    
+                    'render': 'false'
                 }
                 return requests.get('https://api.scraperapi.com/', params=params, timeout=60)
 
@@ -451,12 +450,19 @@ async def parse_daft(seen_urls):
                 continue
 
             data = json.loads(script_tag.string)
-            listings = data.get('props', {}).get('pageProps', {}).get('searchResult', {}).get('listings', [])
+            page_props = data.get('props', {}).get('pageProps', {})
+            
+            # Универсальный поиск списка объявлений в Next.js JSON
+            listings = page_props.get('listings') or page_props.get('searchResult', {}).get('listings') or []
+
+            if not listings:
+                print(f"[-] Объявления в JSON для {config['name']} не найдены.")
+                continue
 
             print(f"[+] Из HTML вытащено {len(listings)} объявлений для {config['name']}!")
 
             for item in listings:
-                l_data = item.get("listing", {})
+                l_data = item.get("listing", {}) if isinstance(item, dict) else {}
                 seo_path = l_data.get("seoFriendlyPath", "")
                 price_text = l_data.get("price", "").lower()
                 
