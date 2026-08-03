@@ -16,27 +16,58 @@ from curl_cffi import requests
 
 # === НАСТРОЙКИ ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
+# 🔑 ПУЛ КЛЮЧЕЙ SCRAPERAPI (Добавляй сюда сколько угодно, каждый в кавычках через запятую)
 
 # 🔑 ВСТАВЬ СЮДА СВОЙ КЛЮЧ ИЗ ЛИЧНОГО КАБИНЕТА SCRAPERAPI
-SCRAPER_API_KEY = "e9cac5ae6035bca21364a264bb9fc28a"
+# 🔑 ПУЛ КЛЮЧЕЙ
+SCRAPER_API_KEYS = [
+    "e9cac5ae6035bca21364a264bb9fc28a",
+    "12b60ad5de2c52fd8c28efc763de5e9d"
+]
 
+SCRAPINGBEE_API_KEYS = [
+    "R0YC02QE1H97GD21FY9FR373RXUDYOO9WV12DTJ6NJGV2TQVG3YKMQ6902PSL1O7WQ36QCW6TWQXCMCM",
+    "TJN717W8KNTM4URYLWGOZAOM1ISWAS7NAKDA52Z2NJ72SC911AGKH0WZJ46COPL5X8TDF76E5D3K8KCX"
+]
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(CURRENT_DIR, "seen_daft_urls.txt")
 
 # === 🌍 ГЕОГРАФИЯ ИРЛАНДИИ ===
+# === 🌍 ГЕОГРАФИЯ ИРЛАНДИИ (26 ГРАФСТВ РЕСПУБЛИКИ) ===
 IRELAND_REGIONS = {
-    "Waterford": ["Waterford City", "Tramore", "Dungarvan", "Kilmacthomas", "Portlaw", "Dunmore East"],
-    "Wexford": ["Wexford Town", "New Ross", "Enniscorthy", "Gorey"],
-    "Dublin": ["Dublin City", "Swords", "Tallaght", "Lucan", "Blackrock", "Dun Laoghaire"],
-    "Cork": ["Cork City", "Kinsale", "Cobh", "Bandon", "Mallow", "Midleton"],
-    "Galway": ["Galway City", "Tuam", "Loughrea", "Oranmore", "Athenry"],
-    "Limerick": ["Limerick City", "Castletroy", "Newcastle West", "Adare"],
-    "Kerry": ["Tralee", "Killarney", "Dingle", "Kenmare"],
-    "Clare": ["Ennis", "Shannon", "Kilrush", "Lahinch"],
-    "Kildare": ["Naas", "Maynooth", "Newbridge", "Celbridge", "Leixlip"],
-    "Meath": ["Navan", "Ashbourne", "Trim", "Kells"],
-    "Wicklow": ["Bray", "Greystones", "Arklow", "Wicklow Town"],
-    "Kilkenny": ["Kilkenny City", "Callan", "Thomastown"]
+    # Leinster (Ленстер)
+    "Dublin": {"province": "Leinster", "cities": ["Dublin City", "Swords", "Tallaght", "Lucan", "Blackrock"]},
+    "Kildare": {"province": "Leinster", "cities": ["Naas", "Maynooth", "Newbridge", "Celbridge"]},
+    "Wicklow": {"province": "Leinster", "cities": ["Bray", "Greystones", "Arklow"]},
+    "Wexford": {"province": "Leinster", "cities": ["Wexford Town", "New Ross", "Enniscorthy", "Gorey"]},
+    "Kilkenny": {"province": "Leinster", "cities": ["Kilkenny City"]},
+    "Carlow": {"province": "Leinster", "cities": ["Carlow Town"]},
+    "Laois": {"province": "Leinster", "cities": ["Portlaoise"]},
+    "Longford": {"province": "Leinster", "cities": ["Longford Town"]},
+    "Louth": {"province": "Leinster", "cities": ["Dundalk", "Drogheda"]},
+    "Meath": {"province": "Leinster", "cities": ["Navan", "Ashbourne"]},
+    "Offaly": {"province": "Leinster", "cities": ["Tullamore"]},
+    "Westmeath": {"province": "Leinster", "cities": ["Athlone", "Mullingar"]},
+
+    # Munster (Манстер)
+    "Cork": {"province": "Munster", "cities": ["Cork City", "Kinsale", "Cobh", "Bandon"]},
+    "Waterford": {"province": "Munster", "cities": ["Waterford City", "Tramore", "Dungarvan"]},
+    "Limerick": {"province": "Munster", "cities": ["Limerick City", "Castletroy"]},
+    "Kerry": {"province": "Munster", "cities": ["Tralee", "Killarney", "Dingle"]},
+    "Clare": {"province": "Munster", "cities": ["Ennis", "Shannon", "Lahinch"]},
+    "Tipperary": {"province": "Munster", "cities": ["Clonmel", "Nenagh"]},
+
+    # Connacht (Коннахт)
+    "Galway": {"province": "Connacht", "cities": ["Galway City", "Tuam", "Oranmore"]},
+    "Mayo": {"province": "Connacht", "cities": ["Castlebar", "Westport"]},
+    "Roscommon": {"province": "Connacht", "cities": ["Roscommon Town"]},
+    "Sligo": {"province": "Connacht", "cities": ["Sligo Town"]},
+    "Leitrim": {"province": "Connacht", "cities": ["Carrick-on-Shannon"]},
+
+    # Ulster (Ольстер - Республика)
+    "Cavan": {"province": "Ulster", "cities": ["Cavan Town"]},
+    "Donegal": {"province": "Ulster", "cities": ["Letterkenny"]},
+    "Monaghan": {"province": "Ulster", "cities": ["Monaghan Town"]}
 }
 
 logging.basicConfig(level=logging.INFO)
@@ -421,25 +452,36 @@ async def show_filters(message: types.Message):
 # 🕵️‍♂️ ПАРСЕРЫ (ОПТИМИЗИРОВАННЫЙ РАСХОД)
 # ==========================================
 async def parse_daft(seen_urls):
-    configs = [
-        {"name": "Wexford (Комнаты)", "url": "https://www.daft.ie/sharing/wexford?sort=publishDateDesc", "is_whole": False},
-        {"name": "Wexford (Целиком)", "url": "https://www.daft.ie/property-for-rent/wexford?sort=publishDateDesc", "is_whole": True},
-        {"name": "Waterford (Комнаты)", "url": "https://www.daft.ie/sharing/waterford?sort=publishDateDesc", "is_whole": False},
-        {"name": "Waterford (Целиком)", "url": "https://www.daft.ie/property-for-rent/waterford?sort=publishDateDesc", "is_whole": True},
-        {"name": "Galway (Комнаты)", "url": "https://www.daft.ie/sharing/galway?sort=publishDateDesc", "is_whole": False},
-        {"name": "Galway (Целиком)", "url": "https://www.daft.ie/property-for-rent/galway?sort=publishDateDesc", "is_whole": True}
-    ]
+    # 💥 Берём все 26 графств прямо из нашего словаря IRELAND_REGIONS!
+    counties = [c.lower() for c in IRELAND_REGIONS.keys()]
+
+    configs = []
+    for c in counties:
+        configs.append({"name": f"{c.title()} (Комнаты)", "url": f"https://www.daft.ie/sharing/{c}?sort=publishDateDesc", "is_whole": False})
+        configs.append({"name": f"{c.title()} (Целиком)", "url": f"https://www.daft.ie/property-for-rent/{c}?sort=publishDateDesc", "is_whole": True})
 
     for config in configs:
-        print(f"[*] Сканируем Daft (ScraperAPI) -> {config['name']}...")
+        print(f"[*] Сканируем Daft -> {config['name']}...")
         try:
             def fetch_daft():
-                params = {
-                    'api_key': SCRAPER_API_KEY,
-                    'url': config["url"],
-                    'render': 'false'
-                }
-                return requests.get('https://api.scraperapi.com/', params=params, timeout=60)
+                # Бот решает случайным образом, какой сервис использовать (50/50)
+                provider = random.choice(["scraperapi", "scrapingbee"])
+
+                if provider == "scraperapi":
+                    params = {
+                        'api_key': random.choice(SCRAPER_API_KEYS),
+                        'url': config["url"],
+                        'render': 'false'
+                    }
+                    return requests.get('https://api.scraperapi.com/', params=params, timeout=60)
+                
+                else:  # scrapingbee
+                    params = {
+                        'api_key': random.choice(SCRAPINGBEE_API_KEYS),
+                        'url': config["url"],
+                        'render_js': 'false'
+                    }
+                    return requests.get('https://app.scrapingbee.com/api/v1/', params=params, timeout=60)
 
             res = await asyncio.to_thread(fetch_daft)
             if res.status_code != 200:
@@ -487,57 +529,13 @@ async def parse_daft(seen_urls):
         except Exception as e:
             print(f"[!] Ошибка парсинга Daft: {e}")
 
-async def parse_rent(seen_urls):
-    print("[*] Проверяем Rent.ie (НАПРЯМУЮ, 0 КРЕДИТОВ)...")
-    try:
-        # Rent.ie прекрасно отдается напрямую с Azure без платных прокси!
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-        }
-        
-        def fetch_rent():
-            return requests.get("https://www.rent.ie/rooms-to-rent/ireland/", headers=headers, impersonate="chrome124", timeout=30)
-
-        res = await asyncio.to_thread(fetch_rent)
-        if res.status_code != 200:
-            print(f"[!] Rent.ie ответил кодом {res.status_code}")
-            return
-            
-        soup = BeautifulSoup(res.text, "html.parser")
-        cards = soup.find_all("div", class_=lambda c: c and "search-result" in c)
-        
-        if not cards: 
-            return print("[-] На Rent.ie пока нет карточек.")
-            
-        print(f"[+] Найдено на Rent.ie: {len(cards)}")
-
-        for card in cards:
-            a_tag = card.find("a", href=True)
-            if not a_tag or "/rooms-to-rent/" not in a_tag["href"]: continue
-            url = ("https://www.rent.ie" + a_tag["href"]) if not a_tag["href"].startswith("http") else a_tag["href"]
-            
-            p_match = re.search(r'€\s*(\d+)', card.get_text())
-            if not p_match: continue
-            raw_p = int(p_match.group(1))
-            is_w = any(w in card.get_text().lower() for w in ["week", "pw", "w/k"])
-            m_price = int(raw_p * 4.33) if is_w else raw_p
-            d_price = f"€{raw_p}/нед (~€{m_price}/мес)" if is_w else f"€{raw_p}/мес"
-            address = a_tag.get_text(strip=True) or "Ireland"
-
-            save_listing_to_db("Rent.ie", address, m_price, d_price, url, False, "Комната")
-            if url not in seen_urls:
-                await broadcast_message(f"🚨 *Новое на Rent.ie!*\n🏠 {address}\n💰 {d_price}\n🔗 [ОТКРЫТЬ]({url})", m_price, address, False)
-                save_new_url(url)
-                seen_urls.add(url)
-    except Exception as e:
-        print(f"[!] Ошибка Rent.ie: {e}")
 
 async def parse_rent(seen_urls):
     print("[*] Проверяем Rent.ie (ScraperAPI)...")
     try:
         def fetch_rent():
             params = {
-                'api_key': SCRAPER_API_KEY,
+                'api_key': SCRAPER_API_KEYS,
                 'url': "https://www.rent.ie/rooms-to-rent/ireland/",
                 'render': 'false',
                 'premium': 'true'
