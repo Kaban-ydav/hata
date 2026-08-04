@@ -16,9 +16,7 @@ from curl_cffi import requests
 
 # === НАСТРОЙКИ ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
-# 🔑 ПУЛ КЛЮЧЕЙ SCRAPERAPI (Добавляй сюда сколько угодно, каждый в кавычках через запятую)
 
-# 🔑 ВСТАВЬ СЮДА СВОЙ КЛЮЧ ИЗ ЛИЧНОГО КАБИНЕТА SCRAPERAPI
 # 🔑 ПУЛ КЛЮЧЕЙ
 SCRAPER_API_KEYS = [
     "e9cac5ae6035bca21364a264bb9fc28a",
@@ -29,10 +27,10 @@ SCRAPINGBEE_API_KEYS = [
     "R0YC02QE1H97GD21FY9FR373RXUDYOO9WV12DTJ6NJGV2TQVG3YKMQ6902PSL1O7WQ36QCW6TWQXCMCM",
     "TJN717W8KNTM4URYLWGOZAOM1ISWAS7NAKDA52Z2NJ72SC911AGKH0WZJ46COPL5X8TDF76E5D3K8KCX"
 ]
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(CURRENT_DIR, "seen_daft_urls.txt")
 
-# === 🌍 ГЕОГРАФИЯ ИРЛАНДИИ ===
 # === 🌍 ГЕОГРАФИЯ ИРЛАНДИИ (26 ГРАФСТВ РЕСПУБЛИКИ) ===
 IRELAND_REGIONS = {
     # Leinster (Ленстер)
@@ -312,7 +310,7 @@ def get_regions_kb():
 def get_cities_kb(region):
     kb = [[InlineKeyboardButton(text=f"🏡 Всё графство {region}", callback_data=f"addloc_{region}")]]
     row = []
-    for city in IRELAND_REGIONS[region]:
+    for city in IRELAND_REGIONS[region]["cities"]:
         row.append(InlineKeyboardButton(text=city, callback_data=f"addloc_{city}"))
         if len(row) == 2:
             kb.append(row)
@@ -446,13 +444,9 @@ async def show_filters(message: types.Message):
     await message.answer(f"💰 Бюджет: {f['max_price']} €/мес\n📍 Локации: {', '.join(f['locations']).title()}\n🏠 Тип: {f['property_type']}", reply_markup=main_menu)
 
 # ==========================================
-# 🕵️‍♂️ ПАРСЕРЫ (БЫСТРЫЕ ЧЕРЕЗ SCRAPERAPI)
-# ==========================================
-# ==========================================
-# 🕵️‍♂️ ПАРСЕРЫ (ОПТИМИЗИРОВАННЫЙ РАСХОД)
+# 🕵️‍♂️ ПАРСЕРЫ
 # ==========================================
 async def parse_daft(seen_urls):
-    # 💥 Берём все 26 графств прямо из нашего словаря IRELAND_REGIONS!
     counties = [c.lower() for c in IRELAND_REGIONS.keys()]
 
     configs = []
@@ -484,7 +478,7 @@ async def parse_daft(seen_urls):
 
             res = await asyncio.to_thread(fetch_daft)
             if res.status_code != 200:
-                print(f"[!] ScraperAPI вернул код {res.status_code} для {config['name']}")
+                print(f"[!] Ошибка запроса (Код {res.status_code}) для {config['name']}")
                 continue
 
             soup = BeautifulSoup(res.text, "html.parser")
@@ -528,18 +522,15 @@ async def parse_daft(seen_urls):
         except Exception as e:
             print(f"[!] Ошибка парсинга Daft: {e}")
 
-
 async def parse_rent(seen_urls):
-    print("[*] Проверяем Rent.ie (ScraperAPI)...")
+    print("[*] Проверяем Rent.ie (НАПРЯМУЮ, 0 КРЕДИТОВ)...")
     try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        }
+        
         def fetch_rent():
-            params = {
-                'api_key': SCRAPER_API_KEYS,
-                'url': "https://www.rent.ie/rooms-to-rent/ireland/",
-                'render': 'false',
-                'premium': 'true'
-            }
-            return requests.get('https://api.scraperapi.com/', params=params, timeout=60)
+            return requests.get("https://www.rent.ie/rooms-to-rent/ireland/", headers=headers, impersonate="chrome124", timeout=30)
 
         res = await asyncio.to_thread(fetch_rent)
         if res.status_code != 200:
@@ -583,7 +574,6 @@ async def sites_parser_loop():
             await parse_daft(seen_urls)
             await parse_rent(seen_urls)
             
-            # Спим 4 часа (14400 секунд), чтобы уложиться в 1000 бесплатных запросов
             sleep_t = 14400 
             print(f"\n[*] Все проверено. Спим {sleep_t // 3600} часа...")
             await asyncio.sleep(sleep_t)
