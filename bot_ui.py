@@ -464,22 +464,21 @@ async def parse_daft(seen_urls):
         print(f"[*] Сканируем Daft -> {config['name']}...")
         try:
             def fetch_daft():
-                # Бот решает случайным образом, какой сервис использовать (50/50)
                 provider = random.choice(["scraperapi", "scrapingbee"])
 
                 if provider == "scraperapi":
                     params = {
                         'api_key': random.choice(SCRAPER_API_KEYS),
                         'url': config["url"],
-                        'render': 'false'
+                        'render': 'false',
+                        'retry_404': 'true'
                     }
                     return requests.get('https://api.scraperapi.com/', params=params, timeout=60)
                 
                 else:  # scrapingbee
                     params = {
                         'api_key': random.choice(SCRAPINGBEE_API_KEYS),
-                        'url': config["url"],
-                        'render_js': 'false'
+                        'url': config["url"]
                     }
                     return requests.get('https://app.scrapingbee.com/api/v1/', params=params, timeout=60)
 
