@@ -458,23 +458,33 @@ async def parse_daft(seen_urls):
         print(f"[*] Сканируем Daft -> {config['name']}...")
         try:
             def fetch_daft():
-                provider = random.choice(["scraperapi", "scrapingbee"])
+                # Пробуем отправить запрос (до 3 попыток с разными ключами)
+                for _ in range(3):
+                    provider = random.choice(["scraperapi", "scrapingbee"])
 
-                if provider == "scraperapi":
-                    params = {
-                        'api_key': random.choice(SCRAPER_API_KEYS),
-                        'url': config["url"],
-                        'render': 'false',
-                        'retry_404': 'true'
-                    }
-                    return requests.get('https://api.scraperapi.com/', params=params, timeout=60)
+                    if provider == "scraperapi":
+                        key = random.choice(SCRAPER_API_KEYS)
+                        params = {
+                            'api_key': key,
+                            'url': config["url"],
+                            'render': 'false',
+                            'retry_404': 'true'
+                        }
+                        res = requests.get('https://api.scraperapi.com/', params=params, timeout=60)
+                    else:  # scrapingbee
+                        key = random.choice(SCRAPINGBEE_API_KEYS)
+                        params = {
+                            'api_key': key,
+                            'url': config["url"],
+                            'premium_proxy': 'true'  # 🔥 Пробивает блокировки Daft.ie
+                        }
+                        res = requests.get('https://app.scrapingbee.com/api/v1/', params=params, timeout=60)
+
+                    # Если запрос успешен — возвращаем результат
+                    if res.status_code == 200:
+                        return res
                 
-                else:  # scrapingbee
-                    params = {
-                        'api_key': random.choice(SCRAPINGBEE_API_KEYS),
-                        'url': config["url"]
-                    }
-                    return requests.get('https://app.scrapingbee.com/api/v1/', params=params, timeout=60)
+                return res  # Если за 3 попытки не вышло — отдаем последний ответ
 
             res = await asyncio.to_thread(fetch_daft)
             if res.status_code != 200:
