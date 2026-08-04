@@ -14,8 +14,25 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from curl_cffi import requests
 
-# === НАСТРОЙКИ ===
+# === НАСТРОЙКИ ОСНОВНОГО БОТА ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
+
+# 🚨 НАСТРОЙКИ АДМИН-БОТА (Система оповещений)
+ALERT_BOT_TOKEN = "8745669235:AAH-DHGzNBXHck56eD8Ua-kKSrxwKq7cQCg"  # 👈 Вставь токен от BotFather
+ADMIN_CHAT_ID = 5012390225                   # 👈 Вставь твой личный Telegram ID
+
+def send_system_alert(message_text):
+    """Отправляет сбойные логи через отдельного Админ-бота прямо тебе в ЛС"""
+    try:
+        url = f"https://api.telegram.org/bot{ALERT_BOT_TOKEN}/sendMessage"
+        payload = {
+            "chat_id": ADMIN_CHAT_ID,
+            "text": f"🚨 *[HATA ALERT SYSTEM]*\n\n{message_text}",
+            "parse_mode": "Markdown"
+        }
+        requests.post(url, json=payload, timeout=5)
+    except Exception as e:
+        print(f"[!] Не удалось отправить системный аларм: {e}")
 
 # 🔑 ПУЛ КЛЮЧЕЙ
 SCRAPER_API_KEYS = [
@@ -458,7 +475,6 @@ async def parse_daft(seen_urls):
         print(f"[*] Сканируем Daft -> {config['name']}...")
         try:
             def fetch_daft():
-                # Пробуем отправить запрос (до 3 попыток с разными ключами)
                 for _ in range(3):
                     provider = random.choice(["scraperapi", "scrapingbee"])
 
@@ -476,15 +492,17 @@ async def parse_daft(seen_urls):
                         params = {
                             'api_key': key,
                             'url': config["url"],
-                            'premium_proxy': 'true'  # 🔥 Пробивает блокировки Daft.ie
+                            'premium_proxy': 'true'
                         }
                         res = requests.get('https://app.scrapingbee.com/api/v1/', params=params, timeout=60)
 
-                    # Если запрос успешен — возвращаем результат
                     if res.status_code == 200:
                         return res
-                
-                return res  # Если за 3 попытки не вышло — отдаем последний ответ
+                    elif res.status_code in [401, 429]:
+                        # Сообщаем админу о лимитах ключа
+                        send_system_alert(f"⚠️ Ключ прокси `{key[:6]}...` вернул код `{res.status_code}` (Возможно кончились кредиты).")
+
+                return res
 
             res = await asyncio.to_thread(fetch_daft)
             if res.status_code != 200:
@@ -578,17 +596,28 @@ async def parse_rent(seen_urls):
 
 async def sites_parser_loop():
     print("🚀 Фоновый парсер запущен!")
+    send_system_alert("🟢 *Система парсинга успешно запущена и работает!*")
+    
     seen_urls = load_seen_urls()
+    consecutive_errors = 0
+    
     while True:
         try:
             await parse_daft(seen_urls)
             await parse_rent(seen_urls)
             
+            consecutive_errors = 0
             sleep_t = 14400 
             print(f"\n[*] Все проверено. Спим {sleep_t // 3600} часа...")
             await asyncio.sleep(sleep_t)
         except Exception as e:
+            consecutive_errors += 1
             print(f"[⚠️] Ошибка цикла: {e}. Рестарт через 10с.")
+            
+            # При 3 ошибках подряд — слать аларм в админ-бот
+            if consecutive_errors >= 3:
+                send_system_alert(f"🔴 *Критический сбой парсера!*\nОшибка повторяется `{consecutive_errors}` раз подряд:\n`{e}`")
+                
             await asyncio.sleep(10)
 
 async def main():
