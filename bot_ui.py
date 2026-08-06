@@ -556,31 +556,22 @@ async def parse_daft(seen_urls):
         try:
             def fetch_daft():
                 for _ in range(3):
-                    provider = random.choice(["scraperapi", "scrapingbee"])
-
-                    if provider == "scraperapi":
-                        key = random.choice(SCRAPER_API_KEYS)
-                        params = {
-                            'api_key': key,
-                            'url': config["url"],
-                            'render': 'false',
-                            'retry_404': 'true'
-                        }
-                        res = requests.get('https://api.scraperapi.com/', params=params, timeout=60)
-                    else:  # scrapingbee
-                        key = random.choice(SCRAPINGBEE_API_KEYS)
-                        params = {
-                            'api_key': key,
-                            'url': config["url"],
-                            'premium_proxy': 'true'
-                        }
-                        res = requests.get('https://app.scrapingbee.com/api/v1/', params=params, timeout=60)
+                    # Используем ТОЛЬКО ScraperAPI, так как ScrapingBee пуст!
+                    key = random.choice(SCRAPER_API_KEYS)
+                    params = {
+                        'api_key': key,
+                        'url': config["url"],
+                        'render': 'false',
+                        'retry_404': 'true'
+                    }
+                    res = requests.get('https://api.scraperapi.com/', params=params, timeout=60)
 
                     if res.status_code == 200:
                         return res
                     elif res.status_code in [401, 429]:
-                        # Сообщаем админу о лимитах ключа
-                        send_system_alert(f"⚠️ Ключ прокси `{key[:6]}...` вернул код `{res.status_code}` (Возможно кончились кредиты).")
+                        send_system_alert(f"⚠️ Ключ прокси `{key[:6]}...` вернул код `{res.status_code}`.")
+
+                return res
 
                 return res
 
