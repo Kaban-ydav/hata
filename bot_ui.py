@@ -41,8 +41,10 @@ SCRAPER_API_KEYS = [
 ]
 
 SCRAPINGBEE_API_KEYS = [
-    "R0YC02QE1H97GD21FY9FR373RXUDYOO9WV12DTJ6NJGV2TQVG3YKMQ6902PSL1O7WQ36QCW6TWQXCMCM",
-    "TJN717W8KNTM4URYLWGOZAOM1ISWAS7NAKDA52Z2NJ72SC911AGKH0WZJ46COPL5X8TDF76E5D3K8KCX"
+    
+#"R0YC02QE1H97GD21FY9FR373RXUDYOO9WV12DTJ6NJGV2TQVG3YKMQ6902PSL1O7WQ36QCW6TWQXCMCM",
+    
+#"TJN717W8KNTM4URYLWGOZAOM1ISWAS7NAKDA52Z2NJ72SC911AGKH0WZJ46COPL5X8TDF76E5D3K8KCX"
 ]
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -463,6 +465,84 @@ async def show_filters(message: types.Message):
 # ==========================================
 # 🕵️‍♂️ ПАРСЕРЫ
 # ==========================================
+def parse_price(text):
+    """Вытаскивает цену из текста и переводит недели в месяцы"""
+    match = re.search(r'€\s*([\d,]+)', text)
+    if match:
+        val = int(match.group(1).replace(',', ''))
+        # Если указана цена за неделю, умножаем на 4.33 (среднее кол-во недель в месяце)
+        if "week" in text or "pw" in text or "w/k" in text:
+            return int(val * 4.33)
+        return val
+    return 0
+async def parse_myhome(seen_urls):
+    print("[*] Проверяем MyHome.ie (НАПРЯМУЮ с Azure, 0€)...")
+    
+    target_urls = [
+        "https://www.myhome.ie/rentals/ireland/property-to-rent",
+        "https://www.myhome.ie/rentals/ireland/room-to-share"
+    ]
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5"
+    }
+
+    for url in target_urls:
+        try:
+            # ИСправлено: используем requests.get (от curl_cffi)
+            res = requests.get(url, headers=headers, impersonate="chrome120", timeout=15)
+            
+            if res.status_code != 200:
+                print(f"[!] MyHome вернул код {res.status_code}")
+                continue
+
+            soup = BeautifulSoup(res.text, 'html.parser')
+            cards = soup.find_all(['div', 'article'], class_=re.compile(r'PropertyCard|PropertySearchResult'))
+
+            for card in cards:
+                a_tag = card.find('a', href=True)
+                if not a_tag: continue
+                
+                link = a_tag['href']
+                if not link.startswith("http"):
+                    link = "https://www.myhome.ie" + link
+                
+                link = link.split('?')[0]
+
+                if link in seen_urls:
+                    continue
+
+                card_text = card.get_text(separator=" ").strip()
+                card_text_lower = card_text.lower()
+                
+                # ИСПРАВЛЕНО: Теперь функция parse_price существует!
+                price = parse_price(card_text_lower)
+                
+                location = "ireland"
+                for county_name in IRELAND_REGIONS.keys():
+                    if county_name.lower() in link.lower() or county_name.lower() in card_text_lower:
+                        location = county_name.lower()
+                        break
+
+                is_whole = False if "room-to-share" in link or "share" in card_text_lower else True
+
+                # Сохраняем в память (чтобы не было дублей)
+                save_listing_to_db("MyHome", location.title(), price, f"€{price}/мес", link, is_whole, "Комната" if not is_whole else "")
+                save_new_url(link)
+                seen_urls.add(link)
+
+                print(f"  🔥 НАХОДКА MYHOME: {link} (€{price}, {location})")
+                
+                # ИСПРАВЛЕНО: Вызываем broadcast_message вместо notify_matching_users
+                msg = f"🚨 *Новое на MyHome.ie!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Локация:* {location.title()}\n💰 *Цена:* €{price}/мес\n🔗 [ОТКРЫТЬ]({link})"
+                await broadcast_message(msg, price, location, is_whole)
+
+        except Exception as e:
+            print(f"[!] Ошибка при парсинге MyHome: {e}")
+
+        await asyncio.sleep(2)
 async def parse_daft(seen_urls):
     counties = [c.lower() for c in IRELAND_REGIONS.keys()]
 
@@ -605,7 +685,7 @@ async def sites_parser_loop():
         try:
             await parse_daft(seen_urls)
             await parse_rent(seen_urls)
-            
+            await parse_myhome(seen_urls)
             consecutive_errors = 0
             sleep_t = 14400 
             print(f"\n[*] Все проверено. Спим {sleep_t // 3600} часа...")

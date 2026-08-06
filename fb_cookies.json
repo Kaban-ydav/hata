@@ -1,0 +1,92 @@
+[
+  {
+    "name": "_GRECAPTCHA",
+    "value": "09AKhCRwj6hxVg-xBc5h711KGgJP6YwtByxGVuIrNM4YWdmPTf-eJwcoG6yejwLaE5CA9GlbRGTDT9Jxi7ffntRd8",
+    "domain": "www.google.com",
+    "path": "/recaptcha",
+    "expires": 1801403185.280721,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "datr",
+    "value": "De1xanUQ-s2pBoZn6VFP3-eP",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1820411152.291704,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "sb",
+    "value": "De1xakLQ8fIV0vycst_1k723",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1820411194.314006,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "dpr",
+    "value": "0.9999999724516329",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1786455998,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "wd",
+    "value": "1280x720",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1786455998,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "c_user",
+    "value": "61550016878175",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1817387195.825116,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "oo",
+    "value": "v1%7C3%3A1785851194",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1820411194.615553,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "xs",
+    "value": "46%3A5Zssj_yCT-ioLQ%3A2%3A1785851192%3A-1%3A-1%3A%3AAcwksdLl2Jzk5PZdDPjOp-UlrySYYellpByyOafUvQ",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1817387195.825187,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "presence",
+    "value": "C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1785851198884%2C%22v%22%3A1%7D",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  }
+]
