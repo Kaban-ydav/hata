@@ -568,6 +568,9 @@ async def parse_daft(seen_urls):
 
                     if res.status_code == 200:
                         return res
+                    elif res.status_code == 403:
+                        # Пауза перед повтором, если получили 403
+                        time.sleep(2)
                     elif res.status_code in [401, 429]:
                         send_system_alert(f"⚠️ Ключ прокси `{key[:6]}...` вернул код `{res.status_code}`.")
 
@@ -617,7 +620,7 @@ async def parse_daft(seen_urls):
                     await broadcast_message(msg, m_price, l_data.get("title", ""), is_whole)
                     save_new_url(full_url)
                     seen_urls.add(full_url)
-            await asyncio.sleep(2)
+            await asyncio.sleep(4)
         except Exception as e:
             print(f"[!] Ошибка парсинга Daft: {e}")
 
