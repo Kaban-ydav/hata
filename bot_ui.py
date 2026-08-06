@@ -481,7 +481,8 @@ async def parse_myhome(seen_urls):
     
     target_urls = [
         "https://www.myhome.ie/rentals/ireland/property-to-rent",
-        "https://www.myhome.ie/rentals/ireland/room-to-share"
+        "https://www.myhome.ie/rentals/waterford/property-to-rent",
+        "https://www.myhome.ie/rentals/dublin/property-to-rent"
     ]
 
     headers = {
@@ -609,14 +610,16 @@ async def parse_daft(seen_urls):
     except Exception as e:
         print(f"[!] Ошибка Playwright/TOR: {e}")
 async def parse_rent(seen_urls):
-    print("[*] Проверяем Rent.ie (НАПРЯМУЮ, 0 КРЕДИТОВ)...")
+    print("[*] Проверяем Rent.ie (через TOR, 0€)...")
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        proxies = {
+            'http': 'socks5://127.0.0.1:9050',
+            'https': 'socks5://127.0.0.1:9050'
         }
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0"}
         
         def fetch_rent():
-            return requests.get("https://www.rent.ie/rooms-to-rent/ireland/", headers=headers, impersonate="chrome124", timeout=30)
+            return requests.get("https://www.rent.ie/houses-to-let/renting_ireland/", headers=headers, proxies=proxies, timeout=30)
 
         res = await asyncio.to_thread(fetch_rent)
         if res.status_code != 200:
@@ -633,7 +636,7 @@ async def parse_rent(seen_urls):
 
         for card in cards:
             a_tag = card.find("a", href=True)
-            if not a_tag or "/rooms-to-rent/" not in a_tag["href"]: continue
+            if not a_tag: continue
             url = ("https://www.rent.ie" + a_tag["href"]) if not a_tag["href"].startswith("http") else a_tag["href"]
             
             p_match = re.search(r'€\s*(\d+)', card.get_text())
@@ -664,10 +667,14 @@ async def sites_parser_loop():
             await parse_daft(seen_urls)
             await parse_rent(seen_urls)
             await parse_myhome(seen_urls)
+            
             consecutive_errors = 0
-            sleep_t = 14400 
-            print(f"\n[*] Все проверено. Спим {sleep_t // 3600} часа...")
+            
+            # Проверяем каждые 5 минут (300 секунд)
+            sleep_t = 300 
+            print(f"\n[*] Все проверено. Спим {sleep_t // 60} минут...")
             await asyncio.sleep(sleep_t)
+            
         except Exception as e:
             consecutive_errors += 1
             print(f"[⚠️] Ошибка цикла: {e}. Рестарт через 10с.")
