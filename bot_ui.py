@@ -14,6 +14,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from curl_cffi import requests
 import time
+from playwright.async_api import async_playwright
 # === НАСТРОЙКИ ОСНОВНОГО БОТА ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 
@@ -544,86 +545,69 @@ async def parse_myhome(seen_urls):
 
         await asyncio.sleep(2)
 async def parse_daft(seen_urls):
-    counties = [c.lower() for c in IRELAND_REGIONS.keys()]
+    print("[*] Проверяем Daft.ie (через Playwright + TOR, 0€)...")
+    
+    target_urls = [
+        ("https://www.daft.ie/property-for-rent/ireland", True),
+        ("https://www.daft.ie/sharing/ireland", False)
+    ]
 
-    configs = []
-    for c in counties:
-        configs.append({"name": f"{c.title()} (Комнаты)", "url": f"https://www.daft.ie/sharing/{c}?sort=publishDateDesc", "is_whole": False})
-        configs.append({"name": f"{c.title()} (Целиком)", "url": f"https://www.daft.ie/property-for-rent/{c}?sort=publishDateDesc", "is_whole": True})
+    try:
+        async with async_playwright() as p:
+            # Запускаем Chromium с подменой IP через локальный TOR на Azure
+            browser = await p.chromium.launch(
+                headless=True,
+                proxy={"server": "socks5://127.0.0.1:9050"}
+            )
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+            )
+            page = await context.new_page()
 
-    for config in configs:
-        print(f"[*] Сканируем Daft -> {config['name']}...")
-        try:
-            def fetch_daft():
-                for _ in range(3):
-                    # Используем ТОЛЬКО ScraperAPI, так как ScrapingBee пуст!
-                    key = random.choice(SCRAPER_API_KEYS)
-                    params = {
-                        'api_key': key,
-                        'url': config["url"],
-                        'render': 'false',
-                        'retry_404': 'true'
-                    }
-                    res = requests.get('https://api.scraperapi.com/', params=params, timeout=60)
-
-                    if res.status_code == 200:
-                        return res
-                    elif res.status_code == 403:
-                        # Пауза перед повтором, если получили 403
-                        time.sleep(2)
-                    elif res.status_code in [401, 429]:
-                        send_system_alert(f"⚠️ Ключ прокси `{key[:6]}...` вернул код `{res.status_code}`.")
-
-                return res
-
-                return res
-
-            res = await asyncio.to_thread(fetch_daft)
-            if res.status_code != 200:
-                print(f"[!] Ошибка запроса (Код {res.status_code}) для {config['name']}")
-                continue
-
-            soup = BeautifulSoup(res.text, "html.parser")
-            script_tag = soup.find("script", id="__NEXT_DATA__")
-            if not script_tag:
-                print(f"[-] Не найден JSON на странице {config['name']}")
-                continue
-
-            data = json.loads(script_tag.string)
-            page_props = data.get('props', {}).get('pageProps', {})
-            listings = page_props.get('listings') or page_props.get('searchResult', {}).get('listings') or []
-
-            if not listings:
-                continue
-
-            print(f"[+] Из HTML вытащено {len(listings)} объявлений для {config['name']}!")
-
-            for item in listings:
-                l_data = item.get("listing", {}) if isinstance(item, dict) else {}
-                seo_path = l_data.get("seoFriendlyPath", "")
-                price_text = l_data.get("price", "").lower()
-                
-                if not seo_path or not price_text: continue
-                
-                full_url = "https://www.daft.ie" + seo_path
+            for url, is_whole in target_urls:
                 try:
-                    p_digits = int(''.join(filter(str.isdigit, price_text)))
-                    m_price = int(p_digits * 4.33) if "week" in price_text or "pw" in price_text else p_digits
-                    d_price = f"{price_text} (~€{m_price}/мес)" if "week" in price_text or "pw" in price_text else price_text
-                except ValueError: continue
+                    await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                    await page.wait_for_timeout(3000)
 
-                is_whole = config["is_whole"]
-                save_listing_to_db("Daft", l_data.get("title", ""), m_price, d_price, full_url, is_whole, str(l_data.get("numBedrooms", "")))
+                    html = await page.content()
+                    soup = BeautifulSoup(html, "html.parser")
+                    script_tag = soup.find("script", id="__NEXT_DATA__")
+                    
+                    if not script_tag or not script_tag.string:
+                        continue
 
-                if full_url not in seen_urls:
-                    msg = f"🚨 *Найдено на Daft!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Адрес:* {l_data.get('title', '')}\n💰 *Цена:* {d_price}\n🔗 [ОТКРЫТЬ]({full_url})"
-                    await broadcast_message(msg, m_price, l_data.get("title", ""), is_whole)
-                    save_new_url(full_url)
-                    seen_urls.add(full_url)
-            await asyncio.sleep(4)
-        except Exception as e:
-            print(f"[!] Ошибка парсинга Daft: {e}")
+                    data = json.loads(script_tag.string)
+                    page_props = data.get('props', {}).get('pageProps', {})
+                    listings = page_props.get('listings') or page_props.get('searchResult', {}).get('listings') or []
 
+                    print(f"[+] Из Daft вытащено {len(listings)} объявлений!")
+
+                    for item in listings:
+                        l_data = item.get("listing", {}) if isinstance(item, dict) else {}
+                        seo_path = l_data.get("seoFriendlyPath", "")
+                        price_text = l_data.get("price", "").lower()
+                        
+                        if not seo_path or not price_text: continue
+                        
+                        full_url = "https://www.daft.ie" + seo_path
+                        m_price = parse_price(price_text)
+                        d_price = f"€{m_price}/мес"
+                        title = l_data.get("title", "Ireland")
+
+                        save_listing_to_db("Daft", title, m_price, d_price, full_url, is_whole, str(l_data.get("numBedrooms", "")))
+
+                        if full_url not in seen_urls:
+                            msg = f"🚨 *Найдено на Daft!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Адрес:* {title}\n💰 *Цена:* {d_price}\n🔗 [ОТКРЫТЬ]({full_url})"
+                            await broadcast_message(msg, m_price, title, is_whole)
+                            save_new_url(full_url)
+                            seen_urls.add(full_url)
+
+                except Exception as e_inner:
+                    print(f"[!] Ошибка загрузки страницы Daft: {e_inner}")
+
+            await browser.close()
+    except Exception as e:
+        print(f"[!] Ошибка Playwright/TOR: {e}")
 async def parse_rent(seen_urls):
     print("[*] Проверяем Rent.ie (НАПРЯМУЮ, 0 КРЕДИТОВ)...")
     try:
