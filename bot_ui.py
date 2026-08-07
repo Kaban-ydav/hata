@@ -558,7 +558,11 @@ async def parse_daft(seen_urls):
             # Запускаем Chromium с подменой IP через локальный TOR на Azure
             browser = await p.chromium.launch(
                 headless=True,
-                proxy={"server": "socks5://127.0.0.1:9050"}
+                proxy={
+    "server": "http://gw.dataimpulse.com:823",
+    "username": "45055cabf064c15bcefe__s.daft",
+    "password": "40bd628d323f6a4c"
+}
             )
             context = await browser.new_context(
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -612,10 +616,10 @@ async def parse_daft(seen_urls):
 async def parse_rent(seen_urls):
     print("[*] Проверяем Rent.ie (через TOR, 0€)...")
     try:
-        proxies = {
-            'http': 'socks5://127.0.0.1:9050',
-            'https': 'socks5://127.0.0.1:9050'
-        }
+        PROXIES = {
+    "http": "http://45055cabf064c15bcefe__s.daft:40bd628d323f6a4c@gw.dataimpulse.com:823",
+    "https": "http://45055cabf064c15bcefe__s.daft:40bd628d323f6a4c@gw.dataimpulse.com:823"
+}
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0"}
         
         def fetch_rent():

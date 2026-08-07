@@ -1,0 +1,65 @@
+import time
+from stem import Signal
+from stem.control import Controller
+from curl_cffi import requests
+
+TOR_PASSWORD = "your_password"
+TOR_CONTROL_PORT = 9051
+TARGET_URL = "https://www.daft.ie/property-for-rent/ireland"
+
+def renew_tor_ip():
+    """Принудительно сменить выходной узел с учетом лимитов Tor"""
+    print("🔄 Запрашиваем новый IP у Tor...")
+    try:
+        with Controller.from_port(port=TOR_CONTROL_PORT) as controller:
+            controller.authenticate(password=TOR_PASSWORD)
+            controller.signal(Signal.NEWNYM)
+            # Tor строит новую цепь ~10 секунд, не спамим!
+            time.sleep(10)
+    except Exception as e:
+        print(f"⚠️ Ошибка управления Tor: {e}")
+        time.sleep(5)
+
+def check_site(proxy_socks5):
+    """Проверить доступность сайта и валидность контента"""
+    try:
+        response = requests.get(
+            TARGET_URL,
+            proxies={"http": proxy_socks5, "https": proxy_socks5},
+            impersonate="chrome120",
+            timeout=15
+        )
+        
+        # Проверяем, что это реальная страница Daft, а не заглушка-капча
+        if response.status_code == 200 and "Daft" in response.text:
+            print(f"✅ Узел рабочий! ({proxy_socks5})")
+            return True
+        else:
+            print(f"❌ Блок (статус {response.status_code}, возможно капча)")
+            return False
+            
+    except Exception as e:
+        print(f"⚠️ Ошибка соединения: {e}")
+        return False
+
+def main():
+    proxy = "socks5://127.0.0.1:9050"
+    max_attempts = 15 # Ограничиваем цикл!
+    
+    for attempt in range(1, max_attempts + 1):
+        print(f"\n--- Попытка #{attempt}/{max_attempts} ---")
+        
+        if check_site(proxy):
+            print("🎯 Бинго! Можно запускать парсинг.")
+            # Тут вызываем основную логику парсера
+            break
+        else:
+            if attempt < max_attempts:
+                renew_tor_ip()
+            else:
+                print("🛑 Исчерпаны попытки. Все узлы Tor заблокированы DataDome.")
+                print("💤 Ждем 5 минут перед следующим циклом...")
+                time.sleep(300)
+
+if __name__ == "__main__":
+    main()
