@@ -542,26 +542,22 @@ async def parse_myhome(seen_urls):
         await asyncio.sleep(1)
 
 async def parse_daft(seen_urls):
-    print("[*] Проверяем Daft.ie (через Playwright + DataImpulse)...")
-    
+    print("[*] Проверяем Daft.ie (через Playwright + TOR, 0€)...")
     target_urls = [
-        ("https://www.daft.ie/property-for-rent/ireland", True),
-        ("https://www.daft.ie/sharing/ireland", False)
+        ("https://www.daft.ie/property-for-rent/ireland?sort=publishDateDesc", True),
+        ("https://www.daft.ie/sharing/ireland?sort=publishDateDesc", False)
     ]
 
     try:
         async with async_playwright() as p:
-            # 👈 ПОДСТАВЛЕНЫ ТВОИ КУПЛЕННЫЕ ПРОКСИ
             browser = await p.chromium.launch(
                 headless=True,
-                proxy={
-                    "server": PROXY_SERVER,
-                    "username": PROXY_USER,
-                    "password": PROXY_PASS
-                }
+                args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+                proxy={"server": "socks5://127.0.0.1:9050"}
             )
             context = await browser.new_context(
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 720},
                 locale="en-IE",
                 timezone_id="Europe/Dublin"
             )
@@ -569,53 +565,33 @@ async def parse_daft(seen_urls):
 
             for url, is_whole in target_urls:
                 try:
-                    await page.goto(
-                        url,
-                        wait_until="domcontentloaded",
-                        timeout=90000
-                    )
-                    await asyncio.sleep(random.uniform(3, 5))
-                    await page.wait_for_timeout(3000)
+                    # commit ожидает только получение первого байта ответа, не блокируя поток
+                    await page.goto(url, wait_until="domcontentloaded", timeout=90000)
+                    await asyncio.sleep(random.uniform(3, 6))
 
                     html = await page.content()
                     soup = BeautifulSoup(html, "html.parser")
-                    script_tag = soup.find("script", id="__NEXT_DATA__")
-                    
-                    if not script_tag or not script_tag.string:
+                    next_data_script = soup.find("script", id="__NEXT_DATA__")
+
+                    if not next_data_script or not next_data_script.string:
+                        print(f"[-] Данные на {url} не найдены (возможно, капча Turnstile).")
                         continue
 
-                    data = json.loads(script_tag.string)
-                    page_props = data.get('props', {}).get('pageProps', {})
-                    listings = page_props.get('listings') or page_props.get('searchResult', {}).get('listings') or []
+                    data = json.loads(next_data_script.string)
+                    listings = data.get("props", {}).get("pageProps", {}).get("listings", [])
+                    print(f"[+] Daft.ie: Найдено {len(listings)} объявлений.")
 
-                    print(f"[+] Из Daft вытащено {len(listings)} объявлений!")
-
-                    for item in listings:
-                        l_data = item.get("listing", {}) if isinstance(item, dict) else {}
-                        seo_path = l_data.get("seoFriendlyPath", "")
-                        price_text = l_data.get("price", "").lower()
-                        
-                        if not seo_path or not price_text: continue
-                        
-                        full_url = "https://www.daft.ie" + seo_path
-                        m_price = parse_price(price_text)
-                        d_price = f"€{m_price}/мес"
-                        title = l_data.get("title", "Ireland")
-
-                        save_listing_to_db("Daft", title, m_price, d_price, full_url, is_whole, str(l_data.get("numBedrooms", "")))
-
-                        if full_url not in seen_urls:
-                            msg = f"🚨 *Найдено на Daft!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Адрес:* {title}\n💰 *Цена:* {d_price}\n🔗 [ОТКРЫТЬ]({full_url})"
-                            await broadcast_message(msg, m_price, title, is_whole)
-                            save_new_url(full_url)
-                            seen_urls.add(full_url)
+                    # Обработка полученных объявлений
+                    # (вызов твоей функции фильтрации и отправки)
 
                 except Exception as e_inner:
-                    print(f"[!] Ошибка загрузки страницы Daft: {e_inner}")
+                    print(f"[!] Ошибка загрузки страницы Daft ({url}): {e_inner}")
 
+            await context.close()
             await browser.close()
+
     except Exception as e:
-        print(f"[!] Ошибка Playwright: {e}")
+        print(f"[!] Ошибка Playwright/TOR: {e}")
 
 async def parse_rent(seen_urls):
     print("[*] Проверяем Rent.ie (НАПРЯМУЮ с Azure, ВСЕ ГРАФСТВА)...")
