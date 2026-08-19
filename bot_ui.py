@@ -15,12 +15,21 @@ from aiogram.fsm.context import FSMContext
 from curl_cffi import requests
 import time
 from playwright.async_api import async_playwright
+
 # === НАСТРОЙКИ ОСНОВНОГО БОТА ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 
 # 🚨 НАСТРОЙКИ АДМИН-БОТА (Система оповещений)
 ALERT_BOT_TOKEN = "8745669235:AAH-DHGzNBXHck56eD8Ua-kKSrxwKq7cQCg"  # 👈 Вставь токен от BotFather
 ADMIN_CHAT_ID = 5012390225                   # 👈 Вставь твой личный Telegram ID
+
+# 🌐 НАСТРОЙКИ КУПЛЕННОГО ПРОКСИ (DataImpulse)
+PROXY_SERVER = "http://gw.dataimpulse.com:823"
+PROXY_USER = "45055cabf064c15bcefe__s.daft"
+PROXY_PASS = "40bd628d323f6a4c"
+
+# Форматированный URL прокси для requests / curl_cffi
+PROXY_URL_FORMATTED = f"http://{PROXY_USER}:{PROXY_PASS}@gw.dataimpulse.com:823"
 
 def send_system_alert(message_text):
     """Отправляет сбойные логи через отдельного Админ-бота прямо тебе в ЛС"""
@@ -34,19 +43,6 @@ def send_system_alert(message_text):
         requests.post(url, json=payload, timeout=5)
     except Exception as e:
         print(f"[!] Не удалось отправить системный аларм: {e}")
-
-# 🔑 ПУЛ КЛЮЧЕЙ
-SCRAPER_API_KEYS = [
-    "e9cac5ae6035bca21364a264bb9fc28a",
-    "12b60ad5de2c52fd8c28efc763de5e9d"
-]
-
-SCRAPINGBEE_API_KEYS = [
-    
-#"R0YC02QE1H97GD21FY9FR373RXUDYOO9WV12DTJ6NJGV2TQVG3YKMQ6902PSL1O7WQ36QCW6TWQXCMCM",
-    
-#"TJN717W8KNTM4URYLWGOZAOM1ISWAS7NAKDA52Z2NJ72SC911AGKH0WZJ46COPL5X8TDF76E5D3K8KCX"
-]
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(CURRENT_DIR, "seen_daft_urls.txt")
@@ -471,19 +467,19 @@ def parse_price(text):
     match = re.search(r'€\s*([\d,]+)', text)
     if match:
         val = int(match.group(1).replace(',', ''))
-        # Если указана цена за неделю, умножаем на 4.33 (среднее кол-во недель в месяце)
         if "week" in text or "pw" in text or "w/k" in text:
             return int(val * 4.33)
         return val
     return 0
+
 async def parse_myhome(seen_urls):
-    print("[*] Проверяем MyHome.ie (НАПРЯМУЮ с Azure, 0€)...")
+    print("[*] Проверяем MyHome.ie (НАПРЯМУЮ с Azure, ВСЕ ГРАФСТВА)...")
     
-    target_urls = [
-        "https://www.myhome.ie/rentals/ireland/property-to-rent",
-        "https://www.myhome.ie/rentals/waterford/property-to-rent",
-        "https://www.myhome.ie/rentals/dublin/property-to-rent"
-    ]
+    # 1. Автоматически генерируем ссылки для всех графств из твоего словаря!
+    target_urls = ["https://www.myhome.ie/rentals/ireland/property-to-rent"] # Общая лента
+    for county in IRELAND_REGIONS.keys():
+        county_url = f"https://www.myhome.ie/rentals/{county.lower()}/property-to-rent"
+        target_urls.append(county_url)
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -491,13 +487,14 @@ async def parse_myhome(seen_urls):
         "Accept-Language": "en-US,en;q=0.5"
     }
 
+    # Идем по всем 27 ссылкам (Общая + 26 графств)
     for url in target_urls:
         try:
-            # ИСправлено: используем requests.get (от curl_cffi)
+            # 2. Делаем запрос НАПРЯМУЮ без proxies=proxies (ЭКОНОМИМ ТРАФИК!)
             res = requests.get(url, headers=headers, impersonate="chrome120", timeout=15)
             
             if res.status_code != 200:
-                print(f"[!] MyHome вернул код {res.status_code}")
+                print(f"[!] MyHome вернул код {res.status_code} для {url}")
                 continue
 
             soup = BeautifulSoup(res.text, 'html.parser')
@@ -519,7 +516,6 @@ async def parse_myhome(seen_urls):
                 card_text = card.get_text(separator=" ").strip()
                 card_text_lower = card_text.lower()
                 
-                # ИСПРАВЛЕНО: Теперь функция parse_price существует!
                 price = parse_price(card_text_lower)
                 
                 location = "ireland"
@@ -530,23 +526,23 @@ async def parse_myhome(seen_urls):
 
                 is_whole = False if "room-to-share" in link or "share" in card_text_lower else True
 
-                # Сохраняем в память (чтобы не было дублей)
                 save_listing_to_db("MyHome", location.title(), price, f"€{price}/мес", link, is_whole, "Комната" if not is_whole else "")
                 save_new_url(link)
                 seen_urls.add(link)
 
                 print(f"  🔥 НАХОДКА MYHOME: {link} (€{price}, {location})")
                 
-                # ИСПРАВЛЕНО: Вызываем broadcast_message вместо notify_matching_users
                 msg = f"🚨 *Новое на MyHome.ie!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Локация:* {location.title()}\n💰 *Цена:* €{price}/мес\n🔗 [ОТКРЫТЬ]({link})"
                 await broadcast_message(msg, price, location, is_whole)
 
         except Exception as e:
-            print(f"[!] Ошибка при парсинге MyHome: {e}")
+            print(f"[!] Ошибка при парсинге MyHome ({url}): {e}")
 
-        await asyncio.sleep(2)
+        # Небольшая пауза между графствами, чтобы MyHome нас не забанил за спам
+        await asyncio.sleep(1)
+
 async def parse_daft(seen_urls):
-    print("[*] Проверяем Daft.ie (через Playwright + TOR, 0€)...")
+    print("[*] Проверяем Daft.ie (через Playwright + DataImpulse)...")
     
     target_urls = [
         ("https://www.daft.ie/property-for-rent/ireland", True),
@@ -555,23 +551,30 @@ async def parse_daft(seen_urls):
 
     try:
         async with async_playwright() as p:
-            # Запускаем Chromium с подменой IP через локальный TOR на Azure
+            # 👈 ПОДСТАВЛЕНЫ ТВОИ КУПЛЕННЫЕ ПРОКСИ
             browser = await p.chromium.launch(
                 headless=True,
                 proxy={
-    "server": "http://gw.dataimpulse.com:823",
-    "username": "45055cabf064c15bcefe__s.daft",
-    "password": "40bd628d323f6a4c"
-}
+                    "server": PROXY_SERVER,
+                    "username": PROXY_USER,
+                    "password": PROXY_PASS
+                }
             )
             context = await browser.new_context(
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                locale="en-IE",
+                timezone_id="Europe/Dublin"
             )
             page = await context.new_page()
 
             for url, is_whole in target_urls:
                 try:
-                    await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                    await page.goto(
+                        url,
+                        wait_until="domcontentloaded",
+                        timeout=90000
+                    )
+                    await asyncio.sleep(random.uniform(3, 5))
                     await page.wait_for_timeout(3000)
 
                     html = await page.content()
@@ -612,89 +615,81 @@ async def parse_daft(seen_urls):
 
             await browser.close()
     except Exception as e:
-        print(f"[!] Ошибка Playwright/TOR: {e}")
+        print(f"[!] Ошибка Playwright: {e}")
+
 async def parse_rent(seen_urls):
-    print("[*] Проверяем Rent.ie (через TOR, 0€)...")
+    print("[*] Проверяем Rent.ie (НАПРЯМУЮ с Azure, ВСЕ ГРАФСТВА)...")
+    
+    # 1. Генерируем ссылки: Общая Ирландия + все 26 графств
+    target_urls = ["https://www.rent.ie/houses-to-let/renting_ireland/"]
+    for county in IRELAND_REGIONS.keys():
+        county_url = f"https://www.rent.ie/houses-to-let/renting_{county.lower()}/"
+        target_urls.append(county_url)
+
     try:
-        PROXIES = {
-    "http": "http://45055cabf064c15bcefe__s.daft:40bd628d323f6a4c@gw.dataimpulse.com:823",
-    "https": "http://45055cabf064c15bcefe__s.daft:40bd628d323f6a4c@gw.dataimpulse.com:823"
-}
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0"}
-        
-        def fetch_rent():
-            return requests.get("https://www.rent.ie/houses-to-let/renting_ireland/", headers=headers, proxies=proxies, timeout=30)
 
-        res = await asyncio.to_thread(fetch_rent)
-        if res.status_code != 200:
-            print(f"[!] Rent.ie ответил кодом {res.status_code}")
-            return
-            
-        soup = BeautifulSoup(res.text, "html.parser")
-        cards = soup.find_all("div", class_=lambda c: c and "search-result" in c)
-        
-        if not cards: 
-            return print("[-] На Rent.ie пока нет карточек.")
-            
-        print(f"[+] Найдено на Rent.ie: {len(cards)}")
+        # Проходимся циклом по всем ссылкам
+        for url in target_urls:
+            def fetch_rent():
+                # 2. ЗАПРОС НАПРЯМУЮ (БЕЗ ПРОКСИ)
+                return requests.get(url, headers=headers, timeout=30)
 
-        for card in cards:
-            a_tag = card.find("a", href=True)
-            if not a_tag: continue
-            url = ("https://www.rent.ie" + a_tag["href"]) if not a_tag["href"].startswith("http") else a_tag["href"]
-            
-            p_match = re.search(r'€\s*(\d+)', card.get_text())
-            if not p_match: continue
-            raw_p = int(p_match.group(1))
-            is_w = any(w in card.get_text().lower() for w in ["week", "pw", "w/k"])
-            m_price = int(raw_p * 4.33) if is_w else raw_p
-            d_price = f"€{raw_p}/нед (~€{m_price}/мес)" if is_w else f"€{raw_p}/мес"
-            address = a_tag.get_text(strip=True) or "Ireland"
-
-            save_listing_to_db("Rent.ie", address, m_price, d_price, url, False, "Комната")
-            if url not in seen_urls:
-                await broadcast_message(f"🚨 *Новое на Rent.ie!*\n🏠 {address}\n💰 {d_price}\n🔗 [ОТКРЫТЬ]({url})", m_price, address, False)
-                save_new_url(url)
-                seen_urls.add(url)
-    except Exception as e:
-        print(f"[!] Ошибка Rent.ie: {e}")
-
-async def sites_parser_loop():
-    print("🚀 Фоновый парсер запущен!")
-    send_system_alert("🟢 *Система парсинга успешно запущена и работает!*")
-    
-    seen_urls = load_seen_urls()
-    consecutive_errors = 0
-    
-    while True:
-        try:
-            await parse_daft(seen_urls)
-            await parse_rent(seen_urls)
-            await parse_myhome(seen_urls)
-            
-            consecutive_errors = 0
-            
-            # Проверяем каждые 5 минут (300 секунд)
-            sleep_t = 300 
-            print(f"\n[*] Все проверено. Спим {sleep_t // 60} минут...")
-            await asyncio.sleep(sleep_t)
-            
-        except Exception as e:
-            consecutive_errors += 1
-            print(f"[⚠️] Ошибка цикла: {e}. Рестарт через 10с.")
-            
-            # При 3 ошибках подряд — слать аларм в админ-бот
-            if consecutive_errors >= 3:
-                send_system_alert(f"🔴 *Критический сбой парсера!*\nОшибка повторяется `{consecutive_errors}` раз подряд:\n`{e}`")
+            try:
+                res = await asyncio.to_thread(fetch_rent)
+                if res.status_code != 200:
+                    print(f"[!] Rent.ie вернул код {res.status_code} для {url}")
+                    continue
                 
-            await asyncio.sleep(10)
+                soup = BeautifulSoup(res.text, "html.parser")
+                cards = soup.find_all("div", class_=lambda c: c and "search-result" in c)
+                
+                if not cards: 
+                    continue # Если карточек нет, просто идем к следующему графству
+                    
+                for card in cards:
+                    a_tag = card.find("a", href=True)
+                    if not a_tag: continue
+                    link = ("https://www.rent.ie" + a_tag["href"]) if not a_tag["href"].startswith("http") else a_tag["href"]
+                    
+                    if link in seen_urls: continue
 
-async def main():
-    init_db()
-    asyncio.create_task(sites_parser_loop())
-    asyncio.create_task(auto_clean_old_listings())
-    print("🚀 Бот запущен!")
-    await dp.start_polling(bot)
+                    p_match = re.search(r'€\s*(\d+)', card.get_text())
+                    if not p_match: continue
+                    raw_p = int(p_match.group(1))
+                    is_w = any(w in card.get_text().lower() for w in ["week", "pw", "w/k"])
+                    m_price = int(raw_p * 4.33) if is_w else raw_p
+                    d_price = f"€{raw_p}/нед (~€{m_price}/мес)" if is_w else f"€{raw_p}/мес"
+                    address = a_tag.get_text(strip=True) or "Ireland"
 
-if __name__ == "__main__":
-    asyncio.run(main())
+                    # Определяем графство для базы
+                    location = "ireland"
+                    card_text_lower = card.get_text().lower()
+                    for county_name in IRELAND_REGIONS.keys():
+                        if county_name.lower() in link.lower() or county_name.lower() in card_text_lower:
+                            location = county_name.lower()
+                            break
+
+                    # Определяем тип жилья
+                    is_whole = False if "share" in card_text_lower or "room" in link.lower() else True
+
+                    save_listing_to_db("Rent.ie", address, m_price, d_price, link, is_whole, "Комната" if not is_whole else "")
+                    
+                    seen_urls.add(link)
+                    save_new_url(link)
+                    
+                    print(f"  🔥 НАХОДКА RENT.IE: {link} (€{m_price}, {location})")
+
+                    msg = f"🚨 *Новое на Rent.ie!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Адрес:* {address}\n💰 *Цена:* {d_price}\n🔗 [ОТКРЫТЬ]({link})"
+                    
+                    # Передаем location в фильтр, чтобы он 100% правильно срабатывал у пользователей
+                    await broadcast_message(msg, m_price, f"{address} {location}", is_whole)
+
+            except Exception as e_inner:
+                print(f"[!] Ошибка Rent.ie при обработке {url}: {e_inner}")
+
+            # 3. Делаем микро-паузу 1 секунду между графствами, чтобы сайт не выдал бан за частые запросы
+            await asyncio.sleep(1)
+
+    except Exception as e:
+        print(f"[!] Глобальная ошибка Rent.ie: {e}")
