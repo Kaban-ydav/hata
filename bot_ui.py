@@ -13,26 +13,22 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from curl_cffi import requests
-import time
 from playwright.async_api import async_playwright
 
 # === НАСТРОЙКИ ОСНОВНОГО БОТА ===
 TOKEN = "8758634330:AAEtOTqGStH5QH5jWowfAk70k127-oDy6Lw"
 
 # 🚨 НАСТРОЙКИ АДМИН-БОТА (Система оповещений)
-ALERT_BOT_TOKEN = "8745669235:AAH-DHGzNBXHck56eD8Ua-kKSrxwKq7cQCg"  # 👈 Вставь токен от BotFather
-ADMIN_CHAT_ID = 5012390225                   # 👈 Вставь твой личный Telegram ID
+ALERT_BOT_TOKEN = "8745669235:AAH-DHGzNBXHck56eD8Ua-kKSrxwKq7cQCg"
+ADMIN_CHAT_ID = 5012390225
 
 # 🌐 НАСТРОЙКИ КУПЛЕННОГО ПРОКСИ (DataImpulse)
 PROXY_SERVER = "http://gw.dataimpulse.com:823"
 PROXY_USER = "45055cabf064c15bcefe__s.daft"
 PROXY_PASS = "40bd628d323f6a4c"
 
-# Форматированный URL прокси для requests / curl_cffi
-PROXY_URL_FORMATTED = f"http://{PROXY_USER}:{PROXY_PASS}@gw.dataimpulse.com:823"
-
 def send_system_alert(message_text):
-    """Отправляет сбойные логи через отдельного Админ-бота прямо тебе в ЛС"""
+    """Отправляет сбойные логи через отдельного Админ-бота прямо в ЛС"""
     try:
         url = f"https://api.telegram.org/bot{ALERT_BOT_TOKEN}/sendMessage"
         payload = {
@@ -47,9 +43,8 @@ def send_system_alert(message_text):
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(CURRENT_DIR, "seen_daft_urls.txt")
 
-# === 🌍 ГЕОГРАФИЯ ИРЛАНДИИ (26 ГРАФСТВ РЕСПУБЛИКИ) ===
+# === 🌍 ГЕОГРАФИЯ ИРЛАНДИИ (26 ГРАФСТВ) ===
 IRELAND_REGIONS = {
-    # Leinster (Ленстер)
     "Dublin": {"province": "Leinster", "cities": ["Dublin City", "Swords", "Tallaght", "Lucan", "Blackrock"]},
     "Kildare": {"province": "Leinster", "cities": ["Naas", "Maynooth", "Newbridge", "Celbridge"]},
     "Wicklow": {"province": "Leinster", "cities": ["Bray", "Greystones", "Arklow"]},
@@ -62,23 +57,17 @@ IRELAND_REGIONS = {
     "Meath": {"province": "Leinster", "cities": ["Navan", "Ashbourne"]},
     "Offaly": {"province": "Leinster", "cities": ["Tullamore"]},
     "Westmeath": {"province": "Leinster", "cities": ["Athlone", "Mullingar"]},
-
-    # Munster (Манстер)
     "Cork": {"province": "Munster", "cities": ["Cork City", "Kinsale", "Cobh", "Bandon"]},
     "Waterford": {"province": "Munster", "cities": ["Waterford City", "Tramore", "Dungarvan"]},
     "Limerick": {"province": "Munster", "cities": ["Limerick City", "Castletroy"]},
     "Kerry": {"province": "Munster", "cities": ["Tralee", "Killarney", "Dingle"]},
     "Clare": {"province": "Munster", "cities": ["Ennis", "Shannon", "Lahinch"]},
     "Tipperary": {"province": "Munster", "cities": ["Clonmel", "Nenagh"]},
-
-    # Connacht (Коннахт)
     "Galway": {"province": "Connacht", "cities": ["Galway City", "Tuam", "Oranmore"]},
     "Mayo": {"province": "Connacht", "cities": ["Castlebar", "Westport"]},
     "Roscommon": {"province": "Connacht", "cities": ["Roscommon Town"]},
     "Sligo": {"province": "Connacht", "cities": ["Sligo Town"]},
     "Leitrim": {"province": "Connacht", "cities": ["Carrick-on-Shannon"]},
-
-    # Ulster (Ольстер - Республика)
     "Cavan": {"province": "Ulster", "cities": ["Cavan Town"]},
     "Donegal": {"province": "Ulster", "cities": ["Letterkenny"]},
     "Monaghan": {"province": "Ulster", "cities": ["Monaghan Town"]}
@@ -90,48 +79,8 @@ storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
 # ==========================================
-# 🗄️ БАЗА ДАННЫХ И ХРАНЕНИЕ
+# 🗄️ БАЗА ДАННЫХ
 # ==========================================
-async def auto_clean_old_listings():
-    while True:
-        print("🧹 [Чистка БД] Начинаем проверку сохраненных объявлений...")
-        try:
-            conn = sqlite3.connect('users.db')
-            c = conn.cursor()
-            c.execute("SELECT id, url FROM listings")
-            rows = c.fetchall()
-            conn.close()
-
-            deleted_count = 0
-            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-
-            for listing_id, url in rows:
-                try:
-                    response = requests.get(url, headers=headers, timeout=10)
-                    is_deleted = False
-                    if response.status_code == 404:
-                        is_deleted = True
-                    elif "no longer available" in response.text.lower() or "agreed" in response.text.lower():
-                        is_deleted = True
-
-                    if is_deleted:
-                        conn = sqlite3.connect('users.db')
-                        c = conn.cursor()
-                        c.execute("DELETE FROM listings WHERE id = ?", (listing_id,))
-                        conn.commit()
-                        conn.close()
-                        deleted_count += 1
-                        print(f"🗑️ Удалено ID {listing_id}: {url}")
-                except Exception:
-                    pass
-                await asyncio.sleep(1)
-
-            print(f"✅ [Чистка БД] Готово! Удалено: {deleted_count}")
-        except Exception as e:
-            print(f"[!] Ошибка очистки: {e}")
-
-        await asyncio.sleep(86400)
-
 def init_db():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -279,8 +228,47 @@ def save_new_url(url):
     with open(DB_FILE, "a", encoding="utf-8") as f:
         f.write(f"{url}\n")
 
+async def auto_clean_old_listings():
+    while True:
+        print("🧹 [Чистка БД] Начинаем проверку сохраненных объявлений...")
+        try:
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("SELECT id, url FROM listings")
+            rows = c.fetchall()
+            conn.close()
+
+            deleted_count = 0
+            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+
+            for listing_id, url in rows:
+                try:
+                    response = requests.get(url, headers=headers, timeout=10)
+                    is_deleted = False
+                    if response.status_code == 404:
+                        is_deleted = True
+                    elif "no longer available" in response.text.lower() or "agreed" in response.text.lower():
+                        is_deleted = True
+
+                    if is_deleted:
+                        conn = sqlite3.connect('users.db')
+                        c = conn.cursor()
+                        c.execute("DELETE FROM listings WHERE id = ?", (listing_id,))
+                        conn.commit()
+                        conn.close()
+                        deleted_count += 1
+                except Exception:
+                    pass
+                await asyncio.sleep(1)
+
+            print(f"✅ [Чистка БД] Готово! Удалено: {deleted_count}")
+        except Exception as e:
+            print(f"[!] Ошибка очистки: {e}")
+
+        await asyncio.sleep(86400)
+
 # ==========================================
-# 🧠 FSM И КЛАВИАТУРЫ (Telegram UI)
+# 🧠 UI КЛАВИАТУРЫ
 # ==========================================
 class FilterStates(StatesGroup):
     waiting_for_custom_price = State()
@@ -463,7 +451,6 @@ async def show_filters(message: types.Message):
 # 🕵️‍♂️ ПАРСЕРЫ
 # ==========================================
 def parse_price(text):
-    """Вытаскивает цену из текста и переводит недели в месяцы"""
     match = re.search(r'€\s*([\d,]+)', text)
     if match:
         val = int(match.group(1).replace(',', ''))
@@ -473,13 +460,11 @@ def parse_price(text):
     return 0
 
 async def parse_myhome(seen_urls):
-    print("[*] Проверяем MyHome.ie (НАПРЯМУЮ с Azure, ВСЕ ГРАФСТВА)...")
-    
-    # 1. Автоматически генерируем ссылки для всех графств из твоего словаря!
-    target_urls = ["https://www.myhome.ie/rentals/ireland/property-to-rent"] # Общая лента
-    for county in IRELAND_REGIONS.keys():
-        county_url = f"https://www.myhome.ie/rentals/{county.lower()}/property-to-rent"
-        target_urls.append(county_url)
+    print("[*] Проверяем MyHome.ie (НАПРЯМУЮ с Azure)...")
+    target_urls = [
+        "https://www.myhome.ie/rentals/ireland/property-to-rent",
+        "https://www.myhome.ie/rentals/ireland/room-to-share"
+    ]
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -487,14 +472,10 @@ async def parse_myhome(seen_urls):
         "Accept-Language": "en-US,en;q=0.5"
     }
 
-    # Идем по всем 27 ссылкам (Общая + 26 графств)
     for url in target_urls:
         try:
-            # 2. Делаем запрос НАПРЯМУЮ без proxies=proxies (ЭКОНОМИМ ТРАФИК!)
             res = requests.get(url, headers=headers, impersonate="chrome120", timeout=15)
-            
             if res.status_code != 200:
-                print(f"[!] MyHome вернул код {res.status_code} для {url}")
                 continue
 
             soup = BeautifulSoup(res.text, 'html.parser')
@@ -503,21 +484,17 @@ async def parse_myhome(seen_urls):
             for card in cards:
                 a_tag = card.find('a', href=True)
                 if not a_tag: continue
-                
                 link = a_tag['href']
                 if not link.startswith("http"):
                     link = "https://www.myhome.ie" + link
-                
                 link = link.split('?')[0]
 
-                if link in seen_urls:
-                    continue
+                if link in seen_urls: continue
 
                 card_text = card.get_text(separator=" ").strip()
                 card_text_lower = card_text.lower()
-                
                 price = parse_price(card_text_lower)
-                
+
                 location = "ireland"
                 for county_name in IRELAND_REGIONS.keys():
                     if county_name.lower() in link.lower() or county_name.lower() in card_text_lower:
@@ -530,19 +507,15 @@ async def parse_myhome(seen_urls):
                 save_new_url(link)
                 seen_urls.add(link)
 
-                print(f"  🔥 НАХОДКА MYHOME: {link} (€{price}, {location})")
-                
                 msg = f"🚨 *Новое на MyHome.ie!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Локация:* {location.title()}\n💰 *Цена:* €{price}/мес\n🔗 [ОТКРЫТЬ]({link})"
                 await broadcast_message(msg, price, location, is_whole)
 
         except Exception as e:
-            print(f"[!] Ошибка при парсинге MyHome ({url}): {e}")
-
-        # Небольшая пауза между графствами, чтобы MyHome нас не забанил за спам
+            print(f"[!] Ошибка MyHome: {e}")
         await asyncio.sleep(1)
 
 async def parse_daft(seen_urls):
-    print("[*] Проверяем Daft.ie (через Playwright + TOR, 0€)...")
+    print("[*] Проверяем Daft.ie (через DataImpulse Resident Proxy)...")
     target_urls = [
         ("https://www.daft.ie/property-for-rent/ireland?sort=publishDateDesc", True),
         ("https://www.daft.ie/sharing/ireland?sort=publishDateDesc", False)
@@ -550,10 +523,15 @@ async def parse_daft(seen_urls):
 
     try:
         async with async_playwright() as p:
+            # Подключаем купленный DataImpulse прокси
             browser = await p.chromium.launch(
                 headless=True,
                 args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-                proxy={"server": "socks5://127.0.0.1:9050"}
+                proxy={
+                    "server": PROXY_SERVER,
+                    "username": PROXY_USER,
+                    "password": PROXY_PASS
+                }
             )
             context = await browser.new_context(
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -565,69 +543,84 @@ async def parse_daft(seen_urls):
 
             for url, is_whole in target_urls:
                 try:
-                    # commit ожидает только получение первого байта ответа, не блокируя поток
-                    await page.goto(url, wait_until="domcontentloaded", timeout=90000)
-                    await asyncio.sleep(random.uniform(3, 6))
+                    await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                    await asyncio.sleep(random.uniform(2, 4))
 
                     html = await page.content()
                     soup = BeautifulSoup(html, "html.parser")
                     next_data_script = soup.find("script", id="__NEXT_DATA__")
 
                     if not next_data_script or not next_data_script.string:
-                        print(f"[-] Данные на {url} не найдены (возможно, капча Turnstile).")
                         continue
 
                     data = json.loads(next_data_script.string)
                     listings = data.get("props", {}).get("pageProps", {}).get("listings", [])
                     print(f"[+] Daft.ie: Найдено {len(listings)} объявлений.")
 
-                    # Обработка полученных объявлений
-                    # (вызов твоей функции фильтрации и отправки)
+                    for item in listings:
+                        listing_obj = item.get("listing", {})
+                        daft_id = listing_obj.get("id")
+                        seo_title = listing_obj.get("seoFriendlyPath", "")
+                        
+                        if not daft_id or not seo_title:
+                            continue
+
+                        link = f"https://www.daft.ie{seo_title}" if seo_title.startswith("/") else f"https://www.daft.ie/{seo_title}"
+                        link = link.split("?")[0]
+
+                        if link in seen_urls:
+                            continue
+
+                        title = listing_obj.get("title", "Daft Listing")
+                        price_str = str(listing_obj.get("price", "0"))
+                        price = parse_price(price_str)
+                        beds = listing_obj.get("numBedrooms", "")
+                        room_type = f"{beds} сп." if beds else ""
+
+                        save_listing_to_db("Daft.ie", title, price, f"€{price}/мес", link, is_whole, room_type)
+                        save_new_url(link)
+                        seen_urls.add(link)
+
+                        msg = f"🚨 *Новое на Daft.ie!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Адрес:* {title}\n💰 *Цена:* €{price}/мес\n🔗 [ОТКРЫТЬ]({link})"
+                        await broadcast_message(msg, price, title, is_whole)
 
                 except Exception as e_inner:
-                    print(f"[!] Ошибка загрузки страницы Daft ({url}): {e_inner}")
+                    print(f"[!] Ошибка загрузки Daft ({url}): {e_inner}")
 
             await context.close()
             await browser.close()
 
     except Exception as e:
-        print(f"[!] Ошибка Playwright/TOR: {e}")
+        print(f"[!] Ошибка Playwright: {e}")
 
 async def parse_rent(seen_urls):
-    print("[*] Проверяем Rent.ie (НАПРЯМУЮ с Azure, ВСЕ ГРАФСТВА)...")
-    
-    # 1. Генерируем ссылки: Общая Ирландия + все 26 графств
-    target_urls = ["https://www.rent.ie/houses-to-let/renting_ireland/"]
-    for county in IRELAND_REGIONS.keys():
-        county_url = f"https://www.rent.ie/houses-to-let/renting_{county.lower()}/"
-        target_urls.append(county_url)
+    print("[*] Проверяем Rent.ie (НАПРЯМУЮ с Azure)...")
+    target_urls = [
+        "https://www.rent.ie/houses-to-let/renting_ireland/",
+        "https://www.rent.ie/rooms-to-rent/ireland/"
+    ]
 
     try:
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0"}
 
-        # Проходимся циклом по всем ссылкам
         for url in target_urls:
             def fetch_rent():
-                # 2. ЗАПРОС НАПРЯМУЮ (БЕЗ ПРОКСИ)
-                return requests.get(url, headers=headers, timeout=30)
+                return requests.get(url, headers=headers, timeout=20)
 
             try:
                 res = await asyncio.to_thread(fetch_rent)
                 if res.status_code != 200:
-                    print(f"[!] Rent.ie вернул код {res.status_code} для {url}")
                     continue
-                
+
                 soup = BeautifulSoup(res.text, "html.parser")
                 cards = soup.find_all("div", class_=lambda c: c and "search-result" in c)
-                
-                if not cards: 
-                    continue # Если карточек нет, просто идем к следующему графству
-                    
+
                 for card in cards:
                     a_tag = card.find("a", href=True)
                     if not a_tag: continue
                     link = ("https://www.rent.ie" + a_tag["href"]) if not a_tag["href"].startswith("http") else a_tag["href"]
-                    
+                    link = link.split("?")[0]
+
                     if link in seen_urls: continue
 
                     p_match = re.search(r'€\s*(\d+)', card.get_text())
@@ -638,34 +631,46 @@ async def parse_rent(seen_urls):
                     d_price = f"€{raw_p}/нед (~€{m_price}/мес)" if is_w else f"€{raw_p}/мес"
                     address = a_tag.get_text(strip=True) or "Ireland"
 
-                    # Определяем графство для базы
-                    location = "ireland"
-                    card_text_lower = card.get_text().lower()
-                    for county_name in IRELAND_REGIONS.keys():
-                        if county_name.lower() in link.lower() or county_name.lower() in card_text_lower:
-                            location = county_name.lower()
-                            break
-
-                    # Определяем тип жилья
-                    is_whole = False if "share" in card_text_lower or "room" in link.lower() else True
+                    is_whole = False if "rooms-to-rent" in url or "share" in card.get_text().lower() else True
 
                     save_listing_to_db("Rent.ie", address, m_price, d_price, link, is_whole, "Комната" if not is_whole else "")
-                    
                     seen_urls.add(link)
                     save_new_url(link)
-                    
-                    print(f"  🔥 НАХОДКА RENT.IE: {link} (€{m_price}, {location})")
 
                     msg = f"🚨 *Новое на Rent.ie!*\n📌 *Тип:* {'🏡 ЦЕЛОЕ ЖИЛЬЕ' if is_whole else '🛏️ КОМНАТА'}\n🏠 *Адрес:* {address}\n💰 *Цена:* {d_price}\n🔗 [ОТКРЫТЬ]({link})"
-                    
-                    # Передаем location в фильтр, чтобы он 100% правильно срабатывал у пользователей
-                    await broadcast_message(msg, m_price, f"{address} {location}", is_whole)
+                    await broadcast_message(msg, m_price, address, is_whole)
 
             except Exception as e_inner:
-                print(f"[!] Ошибка Rent.ie при обработке {url}: {e_inner}")
+                print(f"[!] Ошибка Rent.ie ({url}): {e_inner}")
 
-            # 3. Делаем микро-паузу 1 секунду между графствами, чтобы сайт не выдал бан за частые запросы
             await asyncio.sleep(1)
 
     except Exception as e:
         print(f"[!] Глобальная ошибка Rent.ie: {e}")
+
+# ==========================================
+# 🔄 ГЛАВНЫЙ ЦИКЛ ПАРСИНГА
+# ==========================================
+async def sites_parser_loop():
+    seen_urls = load_seen_urls()
+    print("🚀 Фоновый парсер запущен!")
+    while True:
+        try:
+            await parse_daft(seen_urls)
+            await parse_rent(seen_urls)
+            await parse_myhome(seen_urls)
+            print("\n[*] Все проверено. Спим 3 минуты...")
+        except Exception as e:
+            print(f"[!] Ошибка в цикле парсинга: {e}")
+            send_system_alert(f"Сбой в цикле парсера: {e}")
+        await asyncio.sleep(180)
+
+async def main():
+    init_db()
+    asyncio.create_task(sites_parser_loop())
+    asyncio.create_task(auto_clean_old_listings())
+    print("🚀 Бот запущен!")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
